@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Cinemas list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Street</th>
+                <th>Streetnumber</th>
+                <th>Zipcode</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for cinema in cinemas %}
+            <tr>
+                <td><a href="{{ path('cinema_show', { 'id': cinema.id }) }}">{{ cinema.id }}</a></td>
+                <td>{{ cinema.name }}</td>
+                <td>{{ cinema.street }}</td>
+                <td>{{ cinema.streetNumber }}</td>
+                <td>{{ cinema.zipcode }}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('cinema_show', { 'id': cinema.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('cinema_edit', { 'id': cinema.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('cinema_new') }}">Create a new cinema</a>
+        </li>
+    </ul>
+{% endblock %}

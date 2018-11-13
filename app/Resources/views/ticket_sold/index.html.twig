@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Ticket_solds list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Cinemahallnumer</th>
+                <th>City</th>
+                <th>Title</th>
+                <th>Price</th>
+                <th>Time</th>
+                <th>Seat</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for ticket_sold in ticket_solds %}
+            <tr>
+                <td><a href="{{ path('ticket_sold_show', { 'id': ticket_sold.id }) }}">{{ ticket_sold.id }}</a></td>
+                <td>{{ ticket_sold.cinemaHallNumer }}</td>
+                <td>{{ ticket_sold.city }}</td>
+                <td>{{ ticket_sold.title }}</td>
+                <td>{{ ticket_sold.price }}</td>
+                <td>{% if ticket_sold.time %}{{ ticket_sold.time|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>{% if ticket_sold.seat %}{{ ticket_sold.seat|join(', ') }}{% endif %}</td>
+                <td>{{ ticket_sold.email }}</td>
+                <td>{{ ticket_sold.status }}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('ticket_sold_show', { 'id': ticket_sold.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('ticket_sold_edit', { 'id': ticket_sold.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('ticket_sold_new') }}">Create a new ticket_sold</a>
+        </li>
+    </ul>
+{% endblock %}

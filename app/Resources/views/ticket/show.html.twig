@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Ticket</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ ticket.id }}</td>
+            </tr>
+            <tr>
+                <th>Cinemahallhasmovieid</th>
+                <td>{{ ticket.cinemaHallHasMovieId }}</td>
+            </tr>
+            <tr>
+                <th>Seatid</th>
+                <td>{% if ticket.seatId %}{{ ticket.seatId|join(', ') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{ ticket.email }}</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>{{ ticket.status }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('ticket_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('ticket_edit', { 'id': ticket.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}
