@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Movieimages list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Orginal</th>
+                <th>Extra</th>
+                <th>Large</th>
+                <th>Normal</th>
+                <th>Small</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for movieImage in movieImages %}
+            <tr>
+                <td><a href="{{ path('movieimages_show', { 'id': movieImage.id }) }}">{{ movieImage.id }}</a></td>
+                <td>{{ movieImage.orginal }}</td>
+                <td>{{ movieImage.extra }}</td>
+                <td>{{ movieImage.large }}</td>
+                <td>{{ movieImage.normal }}</td>
+                <td>{{ movieImage.small }}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('movieimages_show', { 'id': movieImage.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('movieimages_edit', { 'id': movieImage.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('movieimages_new') }}">Create a new movieImage</a>
+        </li>
+    </ul>
+{% endblock %}

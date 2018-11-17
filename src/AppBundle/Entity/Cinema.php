@@ -53,7 +53,7 @@ class Cinema
      * @ORM\ManyToOne(targetEntity="City")
      * @ORM\JoinColumn(name="cityId", nullable = false)
      */
-    private $cityId;
+    private $city;
 
 
     /**
@@ -165,13 +165,13 @@ class Cinema
     /**
      * Set cityId
      *
-     * @param \stdClass $cityId
+     * @param \stdClass $city
      *
      * @return Cinema
      */
-    public function setCityId($cityId)
+    public function setCity($city)
     {
-        $this->cityId = $cityId;
+        $this->city = $city;
 
         return $this;
     }
@@ -181,9 +181,9 @@ class Cinema
      *
      * @return \stdClass
      */
-    public function getCityId()
+    public function getCity()
     {
-        return $this->cityId;
+        return $this->city;
     }
 }
 

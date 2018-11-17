@@ -36,11 +36,10 @@ class Movie
     private $description;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="price", type="decimal", precision=8, scale=2)
+     //* @ORM\OneToOne(targetEntity="MovieImages")
+     //* @ORM\JoinColumn(name="imagesId", nullable = true)
      */
-    private $image;
+    private $images;
 
     /**
      * @var string
@@ -131,5 +130,22 @@ class Movie
     {
         return $this->price;
     }
+
+    /**
+     * @return mixed
+     */
+    public function getImages()
+    {
+        return $this->images;
+    }
+
+    /**
+     * @param mixed $images
+     */
+    public function setImages($images)
+    {
+        $this->images = $images;
+    }
+
 }
 

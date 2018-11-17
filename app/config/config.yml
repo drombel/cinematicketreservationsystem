@@ -7,6 +7,11 @@ imports:
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
     locale: en
+    movie_images_orginal_directory: '%kernel.project_dir%/web/uploads/movie_images_orginal'
+    movie_images_extra_directory: '%kernel.project_dir%/web/uploads/movie_images_extra'
+    movie_images_large_directory: '%kernel.project_dir%/web/uploads/movie_images_large'
+    movie_images_normal_directory: '%kernel.project_dir%/web/uploads/movie_images_normal'
+    movie_images_small_directory: '%kernel.project_dir%/web/uploads/movie_images_small'
 
 framework:
     #esi: ~
