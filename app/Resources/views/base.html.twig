@@ -7,7 +7,12 @@
         <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}" />
     </head>
     <body>
-        {% block body %}{% endblock %}
-        {% block javascripts %}{% endblock %}
+        <div class="container">
+            {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                <a href="{{ logout_path() }}" class="btn btn-danger">Wyloguj</a>
+            {% endif %}
+            {% block body %}{% endblock %}
+            {% block javascripts %}{% endblock %}
+        </div>
     </body>
 </html>

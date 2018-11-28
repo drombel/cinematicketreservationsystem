@@ -5,19 +5,22 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;use Symfony\Component\HttpFoundation\Request;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 /**
  * User controller.
  *
- * @Route("user")
+ * @Route("")
  */
 class UserController extends Controller
 {
     /**
      * Lists all user entities.
      *
-     * @Route("/", name="user_index")
+     * @Route("user/", name="user_index")
      * @Method("GET")
      */
     public function indexAction()
@@ -34,33 +37,65 @@ class UserController extends Controller
     /**
      * Creates a new user entity.
      *
-     * @Route("/new", name="user_new")
+     * @Route("/register", name="user_new")
      * @Method({"GET", "POST"})
      */
-    public function newAction(Request $request)
+    public function newAction(Request $request,UserPasswordEncoderInterface $passwordEncoder)
     {
         $user = new User();
         $form = $this->createForm('AppBundle\Form\UserType', $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $passwordHash =  $passwordEncoder->encodePassword($user, $user->getPassword());
+            $activationToken = hash("sha256", $user->getEmail());
+            $user->setPassword($passwordHash);
+            $user->setEmailActivate(0);
+            $user->setActivationToken($activationToken);
+            $user->setRole('client');
             $em = $this->getDoctrine()->getManager();
             $em->persist($user);
             $em->flush();
 
-            return $this->redirectToRoute('user_show', array('id' => $user->getId()));
+            return $this->redirectToRoute('login');
         }
 
-        return $this->render('user/new.html.twig', array(
-            'user' => $user,
+        return $this->render('register/register.html.twig', array(
             'form' => $form->createView(),
         ));
     }
 
     /**
+     * Login user
+     *
+     * @Route("/login", name="login")
+     */
+    public function loginAction(Request $request, AuthenticationUtils $authUtils)
+    {
+        $errors = $authUtils->getLastAuthenticationError();
+
+        $lastUsername = $authUtils->getLastUsername();
+
+        return $this->render('login/login.html.twig', array(
+            'errors' => $errors,
+            'email' => $lastUsername
+        ));
+    }
+
+    /**
+     * Logout user
+     *
+     * @Route("/logout", name="logout")
+     */
+    public function logoutAction()
+    {
+
+    }
+
+    /**
      * Finds and displays a user entity.
      *
-     * @Route("/{id}", name="user_show")
+     * @Route("user/{id}", name="user_show")
      * @Method("GET")
      */
     public function showAction(User $user)
@@ -76,7 +111,7 @@ class UserController extends Controller
     /**
      * Displays a form to edit an existing user entity.
      *
-     * @Route("/{id}/edit", name="user_edit")
+     * @Route("user/{id}/edit", name="user_edit")
      * @Method({"GET", "POST"})
      */
     public function editAction(Request $request, User $user)
@@ -101,7 +136,7 @@ class UserController extends Controller
     /**
      * Deletes a user entity.
      *
-     * @Route("/{id}", name="user_delete")
+     * @Route("user/{id}", name="user_delete")
      * @Method("DELETE")
      */
     public function deleteAction(Request $request, User $user)
