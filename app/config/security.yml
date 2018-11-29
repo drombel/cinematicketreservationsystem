@@ -20,6 +20,7 @@ security:
             provider: db_provider
             anonymous: ~
             form_login:
+                username_parameter: _email
                 login_path: login
                 check_path: login
 
