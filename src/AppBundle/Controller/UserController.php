@@ -25,13 +25,19 @@ class UserController extends Controller
      */
     public function indexAction()
     {
-        $em = $this->getDoctrine()->getManager();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        $users = $em->getRepository('AppBundle:User')->findAll();
+        if($loggedUserRole === 'admin') {
+            $em = $this->getDoctrine()->getManager();
+            $users = $em->getRepository('AppBundle:User')->findAll();
 
-        return $this->render('user/index.html.twig', array(
-            'users' => $users,
-        ));
+            return $this->render('user/index.html.twig', array(
+                'users' => $users,
+            ));
+        } else {
+            return $this->redirect('http://localhost:8080/cinematicketreservationsystem/web/app_dev.php');
+        }
+
     }
 
     /**
@@ -40,14 +46,14 @@ class UserController extends Controller
      * @Route("/register", name="user_new")
      * @Method({"GET", "POST"})
      */
-    public function newAction(Request $request,UserPasswordEncoderInterface $passwordEncoder)
+    public function newAction(Request $request, \Swift_Mailer $mailer)
     {
         $user = new User();
         $form = $this->createForm('AppBundle\Form\UserType', $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $passwordHash =  $passwordEncoder->encodePassword($user, $user->getPassword());
+            $passwordHash = password_hash($user->getPassword(),PASSWORD_BCRYPT);
             $activationToken = hash("sha256", $user->getEmail());
             $user->setPassword($passwordHash);
             $user->setEmailActivate(0);
@@ -56,6 +62,20 @@ class UserController extends Controller
             $em = $this->getDoctrine()->getManager();
             $em->persist($user);
             $em->flush();
+
+            /*$message = (new \Swift_Message('Registration'))
+                ->setFrom('test@example.com')
+                ->setTo($user->getEmail())
+                ->setBody(
+                    $this->renderView(
+                        'Emails/register.html.twig', array(
+                            'name' => $user->getName()
+                        )
+                    ),
+                    'text/html'
+                );
+
+            $mailer->send($message);*/
 
             return $this->redirectToRoute('login');
         }
@@ -100,12 +120,17 @@ class UserController extends Controller
      */
     public function showAction(User $user)
     {
-        $deleteForm = $this->createDeleteForm($user);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        return $this->render('user/show.html.twig', array(
-            'user' => $user,
-            'delete_form' => $deleteForm->createView(),
-        ));
+        if($loggedUserRole === 'admin') {
+            $deleteForm = $this->createDeleteForm($user);
+            return $this->render('user/show.html.twig', array(
+                'user' => $user,
+                'delete_form' => $deleteForm->createView(),
+            ));
+        } else {
+            return $this->redirect('http://localhost:8080/cinematicketreservationsystem/web/app_dev.php');
+        }
     }
 
     /**
@@ -114,23 +139,73 @@ class UserController extends Controller
      * @Route("user/{id}/edit", name="user_edit")
      * @Method({"GET", "POST"})
      */
-    public function editAction(Request $request, User $user)
+    public function editAction(Request $request, User $user, UserPasswordEncoderInterface $passwordEncoder, $id)
     {
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserId = $this->get('security.token_storage')->getToken()->getUser()->getId();
+
         $deleteForm = $this->createDeleteForm($user);
-        $editForm = $this->createForm('AppBundle\Form\UserType', $user);
-        $editForm->handleRequest($request);
 
-        if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+        if($loggedUserRole === 'client' && strval($loggedUserId) === $id) {
 
-            return $this->redirectToRoute('user_edit', array('id' => $user->getId()));
+            $editUserForm = $this->createForm('AppBundle\Form\UserUpdateType');
+            $editUserForm->handleRequest($request);
+
+            if ($editUserForm->isSubmitted() && $editUserForm->isValid()) {
+                if($editUserForm->getData()['email'] == "") {
+                    if($this->isOldPasswordCorrect($editUserForm->getData()['oldPassword'])) {
+                        $passwordHash = password_hash($editUserForm->getData()['newPassword'],PASSWORD_BCRYPT);
+                        $user->setPassword($passwordHash);
+                        $this->getDoctrine()->getManager()->flush();
+                        return $this->redirectToRoute('logout');
+                    } else {
+                        return $this->redirectToRoute('user_edit', array('id' => $user->getId()));
+                    }
+                } else {
+                    if($this->isEmailInUse($editUserForm->getData()['email']) && $this->isEmailCorrect($editUserForm->getData()['email'])) {
+                        $user->setEmail($editUserForm->getData()['email']);
+                        $activationToken = hash("sha256", $editUserForm->getData()['email']);
+                        $user->setActivationToken($activationToken);
+                        $user->setEmailActivate(0);
+                        $this->getDoctrine()->getManager()->flush();
+                        //WYSLAC MEJLA AKTYWACYJNEGO
+                        return $this->redirectToRoute('logout');
+                    }
+                    return $this->redirectToRoute('user_edit', array('id' => $user->getId()));
+                }
+            }
+
+            return $this->render('user/edit.html.twig', array(
+                'loggedUserRole' => $loggedUserRole,
+                'user' => $user,
+                'edit_form' => $editUserForm->createView(),
+                'delete_form' => $deleteForm->createView(),
+            ));
+
+        } elseif($loggedUserRole === 'client' && strval($loggedUserId) !== $id) {
+
+            return $this->redirect('http://localhost:8080/cinematicketreservationsystem/web/app_dev.php');
+
+        } else {
+
+            $editForm = $this->createForm('AppBundle\Form\UserUpdateAdminType', $user);
+            $editForm->handleRequest($request);
+
+            if ($editForm->isSubmitted() && $editForm->isValid()) {
+                $passwordHash = password_hash($editForm->getData()['newPassword'],PASSWORD_BCRYPT);
+                $user->setPassword($passwordHash);
+                $this->getDoctrine()->getManager()->flush();
+
+                return $this->redirectToRoute('user_edit', array('id' => $user->getId()));
+            }
+
+            return $this->render('user/edit.html.twig', array(
+                'loggedUserRole' => $loggedUserRole,
+                'user' => $user,
+                'edit_form' => $editForm->createView(),
+                'delete_form' => $deleteForm->createView(),
+            ));
         }
-
-        return $this->render('user/edit.html.twig', array(
-            'user' => $user,
-            'edit_form' => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
-        ));
     }
 
     /**
@@ -141,16 +216,22 @@ class UserController extends Controller
      */
     public function deleteAction(Request $request, User $user)
     {
-        $form = $this->createDeleteForm($user);
-        $form->handleRequest($request);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($user);
-            $em->flush();
+        if($loggedUserRole === 'admin') {
+            $form = $this->createDeleteForm($user);
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $em = $this->getDoctrine()->getManager();
+                $em->remove($user);
+                $em->flush();
+            }
+
+            return $this->redirectToRoute('user_index');
+        } else {
+            return $this->redirect('http://localhost:8080/cinematicketreservationsystem/web/app_dev.php');
         }
-
-        return $this->redirectToRoute('user_index');
     }
 
     /**
@@ -167,5 +248,47 @@ class UserController extends Controller
             ->setMethod('DELETE')
             ->getForm()
         ;
+    }
+
+    public function isEmailActive($email)
+    {
+        $repository = $this->getDoctrine()->getRepository(User::class);
+        $user = $repository->findOneBy(array('email' => $email));
+
+        if(empty($user) || ($user->getEmailActivate() == 0)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public function isEmailInUse($email)
+    {
+        $repository = $this->getDoctrine()->getRepository(User::class);
+        $user = $repository->findOneBy(array('email' => $email));
+        if(empty($user)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function isEmailCorrect($email)
+    {
+        if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function isOldPasswordCorrect($password)
+    {
+        $loggedUserPassword = $this->get('security.token_storage')->getToken()->getUser()->getPassword();
+        if(password_verify($password, $loggedUserPassword)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
