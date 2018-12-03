@@ -63,19 +63,20 @@ class UserController extends Controller
             $em->persist($user);
             $em->flush();
 
-            /*$message = (new \Swift_Message('Registration'))
-                ->setFrom('test@example.com')
+            $message = (new \Swift_Message('Registration'))
+                ->setFrom('ticketmaniac2018@gmail.com')
                 ->setTo($user->getEmail())
                 ->setBody(
                     $this->renderView(
                         'Emails/register.html.twig', array(
-                            'name' => $user->getName()
+                            'name' => $user->getName(),
+                            'activationToken' => $user->getActivationToken()
                         )
                     ),
                     'text/html'
                 );
 
-            $mailer->send($message);*/
+            $mailer->send($message);
 
             return $this->redirectToRoute('login');
         }
@@ -93,8 +94,9 @@ class UserController extends Controller
     public function loginAction(Request $request, AuthenticationUtils $authUtils)
     {
         $errors = $authUtils->getLastAuthenticationError();
-
         $lastUsername = $authUtils->getLastUsername();
+
+       // $this->isEmailActive($lastUsername)
 
         return $this->render('login/login.html.twig', array(
             'errors' => $errors,
@@ -139,7 +141,7 @@ class UserController extends Controller
      * @Route("user/{id}/edit", name="user_edit")
      * @Method({"GET", "POST"})
      */
-    public function editAction(Request $request, User $user, UserPasswordEncoderInterface $passwordEncoder, $id)
+    public function editAction(Request $request, User $user, \Swift_Mailer $mailer, $id)
     {
         $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
         $loggedUserId = $this->get('security.token_storage')->getToken()->getUser()->getId();
@@ -168,7 +170,22 @@ class UserController extends Controller
                         $user->setActivationToken($activationToken);
                         $user->setEmailActivate(0);
                         $this->getDoctrine()->getManager()->flush();
-                        //WYSLAC MEJLA AKTYWACYJNEGO
+
+                        $message = (new \Swift_Message('Registration'))
+                            ->setFrom('ticketmaniac2018@gmail.com')
+                            ->setTo($user->getEmail())
+                            ->setBody(
+                                $this->renderView(
+                                    'Emails/register.html.twig', array(
+                                        'name' => $user->getName(),
+                                        'activationToken' => $user->getActivationToken()
+                                    )
+                                ),
+                                'text/html'
+                            );
+
+                        $mailer->send($message);
+
                         return $this->redirectToRoute('logout');
                     }
                     return $this->redirectToRoute('user_edit', array('id' => $user->getId()));
@@ -250,6 +267,23 @@ class UserController extends Controller
         ;
     }
 
+    /**
+     * Verify account
+     *
+     * @Route("/verify", name="verify")
+     */
+    public function verifyAction(Request $request)
+    {
+        $token = $request->query->get('activationToken');
+        if($this->activationTokenCorrect($token)) {
+            $email = $this->changeEmailActivateTrue($token);
+            return $this->render('login/login.html.twig', array(
+                'errors' => '',
+                'email' => $email,
+            ));
+        }
+    }
+
     public function isEmailActive($email)
     {
         $repository = $this->getDoctrine()->getRepository(User::class);
@@ -290,5 +324,35 @@ class UserController extends Controller
         } else {
             return false;
         }
+    }
+
+    public function activationTokenCorrect($token)
+    {
+        $repository = $this->getDoctrine()->getRepository(User::class);
+        $user = $repository->findOneBy(array('activationToken' => $token));
+
+        if(empty($user)) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public function changeEmailActivateTrue($token)
+    {
+        $repository = $this->getDoctrine()->getRepository(User::class);
+        $user = $repository->findOneBy(array('activationToken' => $token));
+        $user->setEmailActivate(1);
+        $this->getDoctrine()->getManager()->flush();
+        return $user->getEmail();
+    }
+
+    public function changeEmailActivateFalse($token)
+    {
+        $repository = $this->getDoctrine()->getRepository(User::class);
+        $user = $repository->findOneBy(array('activationToken' => $token));
+        $user->setEmailActivate(1);
+        $this->getDoctrine()->getManager()->flush();
+        return $user->getEmail();
     }
 }

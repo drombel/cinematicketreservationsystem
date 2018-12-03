@@ -1,8 +1,13 @@
-<h3>You did it! You registered!</h3>
+<h3>Account verification!</h3>
 
-Hi {{ name }}! You're successfully registered.
+Hi {{ name }}!<br><br>
 
 
-To login, go to: <a href="{{ url('login') }}">...</a>.
+Please click this link to verify your account:
+
+<a href="http://localhost:8080/cinematicketreservationsystem/web/app_dev.php/verify?activationToken={{ activationToken }}"> LINK </a>
+<br><br>
+
+If you have received this email by mistake ignore it.<br>
 
 Thanks!
