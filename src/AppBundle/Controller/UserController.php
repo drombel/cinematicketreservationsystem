@@ -7,7 +7,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 /**
@@ -96,12 +95,10 @@ class UserController extends Controller
         $errors = $authUtils->getLastAuthenticationError();
         $lastUsername = $authUtils->getLastUsername();
 
-       // $this->isEmailActive($lastUsername)
-
-        return $this->render('login/login.html.twig', array(
-            'errors' => $errors,
-            'email' => $lastUsername
-        ));
+           return $this->render('login/login.html.twig', array(
+               'errors' => $errors,
+               'email' => $lastUsername,
+           ));
     }
 
     /**
@@ -284,17 +281,6 @@ class UserController extends Controller
         }
     }
 
-    public function isEmailActive($email)
-    {
-        $repository = $this->getDoctrine()->getRepository(User::class);
-        $user = $repository->findOneBy(array('email' => $email));
-
-        if(empty($user) || ($user->getEmailActivate() == 0)) {
-            return false;
-        } else {
-            return true;
-        }
-    }
 
     public function isEmailInUse($email)
     {
