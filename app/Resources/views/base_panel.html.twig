@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+    {% include 'layout/meta.html.twig' %}
+    <body>
+        {% include 'layout/header.html.twig' %}
+        <div class="bg-page-dark-2 pt-5 base_panel">
+            <div class="container">
+                {% block body %}{% endblock %}
+            </div>
+        </div>
+
+        {% include 'layout/footer.html.twig' %}
+        {% block javascripts %}{% endblock %}
+    </body>
+</html>

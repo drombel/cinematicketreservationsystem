@@ -1,76 +1,193 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <div id="wrapper">
-        <div id="container">
-            <div id="welcome">
-                <h1><span>Welcome to</span> Symfony {{ constant('Symfony\\Component\\HttpKernel\\Kernel::VERSION') }}</h1>
+    <section id="slider" class="bg-page-dark-1">
+        <div class="slider-background">
+            {% for i in 1..4 %}
+                <img src="images/slider{{ i }}.jpg" alt="" class="section-slider-background" data-background-id="{{ i }}">
+            {% endfor %}
+        </div>
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between pb-4">
+                <div class="">
+                    <h1><b>Nowości</b> w kiniach</h1>
+                </div>
+                <div class="controls sm-hidden justify-content-between d-flex p-0">
+                    <span id="slider-left"></span>
+                    <span id="slider-right"></span>
+                </div>
             </div>
-
-            <div id="status">
-                <p>
-                    <svg id="icon-status" width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1671 566q0 40-28 68l-724 724-136 136q-28 28-68 28t-68-28l-136-136-362-362q-28-28-28-68t28-68l136-136q28-28 68-28t68 28l294 295 656-657q28-28 68-28t68 28l136 136q28 28 28 68z" fill="#759E1A"/></svg>
-
-                    Your application is now ready. You can start working on it at:
-                    <code>{{ base_dir }}</code>
-                </p>
+            <div class="slider">
+                {% for i in 1..4 %}
+                    <div class="item" data-background-id="{{ i }}">
+                        {% include 'default/movie_preview.html.twig' with
+                            {'title':'Nazwa filmu', 'categories':['category1','category2'], 'mark':4.5,'poster': '/images/sliderimg.jpg'}
+                            only %}
+                    </div>
+                {% endfor %}
             </div>
+        </div>
+    </section>
+    <section id="content" class="bg-page-dark-1 border-before">
+        <div class="container-fluid content-menu pt-4">
+            <div class="container">
+                <div class="row col-12 align-items-center">
+                    <div class="col">
+                        <h2>New items</h2>
+                    </div>
+                </div>
+                <div class="content-tabs col font-weight-light">
+                    <ul class="nav nav-tabs border-0">
+                        <li class="nav-item active">
+                            <a class="nav-link py-3 px-0 mr-4" data-toggle="tab" href="#home">NEW RELEASES</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link py-3 px-0 mr-4" data-toggle="tab" href="#menu1">MOVIES</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link py-3 px-0 mr-4" data-toggle="tab" href="#menu2">TV SERIES</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
 
-            <div id="next">
-                <h2>What's next?</h2>
-                <p>
-                    <svg id="icon-book" version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="-12.5 9 64 64" enable-background="new -12.5 9 64 64" xml:space="preserve">
-                        <path fill="#AAA" d="M6.8,40.8c2.4,0.8,4.5-0.7,4.9-2.5c0.2-1.2-0.3-2.1-1.3-3.2l-0.8-0.8c-0.4-0.5-0.6-1.3-0.2-1.9
-                            c0.4-0.5,0.9-0.8,1.8-0.5c1.3,0.4,1.9,1.3,2.9,2.2c-0.4,1.4-0.7,2.9-0.9,4.2l-0.2,1c-0.7,4-1.3,6.2-2.7,7.5
-                            c-0.3,0.3-0.7,0.5-1.3,0.6c-0.3,0-0.4-0.3-0.4-0.3c0-0.3,0.2-0.3,0.3-0.4c0.2-0.1,0.5-0.3,0.4-0.8c0-0.7-0.6-1.3-1.3-1.3
-                            c-0.6,0-1.4,0.6-1.4,1.7s1,1.9,2.4,1.8c0.8,0,2.5-0.3,4.2-2.5c2-2.5,2.5-5.4,2.9-7.4l0.5-2.8c0.3,0,0.5,0.1,0.8,0.1
-                            c2.4,0.1,3.7-1.3,3.7-2.3c0-0.6-0.3-1.2-0.9-1.2c-0.4,0-0.8,0.3-1,0.8c-0.1,0.6,0.8,1.1,0.1,1.5c-0.5,0.3-1.4,0.6-2.7,0.4l0.3-1.3
-                            c0.5-2.6,1-5.7,3.2-5.8c0.2,0,0.8,0,0.8,0.4c0,0.2,0,0.2-0.2,0.5c-0.2,0.3-0.3,0.4-0.2,0.7c0,0.7,0.5,1.1,1.2,1.1
-                            c0.9,0,1.2-1,1.2-1.4c0-1.2-1.2-1.8-2.6-1.8c-1.5,0.1-2.8,0.9-3.7,2.1c-1.1,1.3-1.8,2.9-2.3,4.5c-0.9-0.8-1.6-1.8-3.1-2.3
-                            c-1.1-0.7-2.3-0.5-3.4,0.3c-0.5,0.4-0.8,1-1,1.6c-0.4,1.5,0.4,2.9,0.8,3.4l0.9,1c0.2,0.2,0.6,0.8,0.4,1.5c-0.3,0.8-1.2,1.3-2.1,1
-                            c-0.4-0.2-1-0.5-0.9-0.9c0.1-0.2,0.2-0.3,0.3-0.5s0.1-0.3,0.1-0.3c0.2-0.6-0.1-1.4-0.7-1.6c-0.6-0.2-1.2,0-1.3,0.8
-                            C4.3,38.4,4.7,40,6.8,40.8z M46.1,20.9c0-4.2-3.2-7.5-7.1-7.5h-3.8C34.8,10.8,32.7,9,30.2,9L-2.3,9.1c-2.8,0.1-4.9,2.4-4.9,5.4
-                            L-7,58.6c0,4.8,8.1,13.9,11.6,14.1l34.7-0.1c3.9,0,7-3.4,7-7.6L46.1,20.9z M-0.3,36.4c0-8.6,6.5-15.6,14.5-15.6
-                            c8,0,14.5,7,14.5,15.6S22.1,52,14.2,52C6.1,52-0.3,45-0.3,36.4z M42.1,65.1c0,1.8-1.5,3.1-3.1,3.1H4.6c-0.7,0-3-1.8-4.5-4.4h30.4
-                            c2.8,0,5-2.4,5-5.4V17.9h3.7c1.6,0,2.9,1.4,2.9,3.1V65.1L42.1,65.1z"/>
-                    </svg>
+        <div class="container pt-5">
+            <div class="tab-content">
+                <div class="tab-pane container active" id="home">
+                    <div class="row">
+                        {% for i in 1..6 %}
+                            <div class="col-6 col-sm-12 col-lg-6 mb-5">
+                                <div class="row">
+                                    <div class="col-12 col-sm-4">
+                                        <img src="/images/sliderimg.jpg" class="img-fluid" alt="">
+                                    </div>
+                                    <div class="col-12 col-sm-8">
+                                        <h4 class="m-0">I Dream in Another Language</h4>
+                                        <p class="mb-1 mt-0">Category1, Category2</p>
+                                        <p class="m-1 mt-0"># ocena</p>
+                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. At eligendi, explicabo facilis illo iusto magnam magni odit quaerat suscipit tempora.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
 
-                    Read the documentation to learn
-                    <a href="https://symfony.com/doc/{{ constant('Symfony\\Component\\HttpKernel\\Kernel::VERSION')[:3] }}/page_creation.html">
-                        How to create your first page in Symfony
-                    </a>
-                </p>
+                <div class="tab-pane container" id="menu1">
+                    <div class="row">
+                    {% for i in 1..12 %} {# to tez jest w sliderze #}
+                        <div class="col-lg-2 col-md-2 col-sm-6 col-xs-12">
+                            {% include 'default/movie_preview.html.twig' with
+                                {'title':'Nazwa filmu', 'categories':['category1','category2'], 'mark':4.5,'poster': '/images/sliderimg.jpg'}
+                                only %}
+                        </div>
+                    {% endfor %}
+                    </div>
+                </div>
+
+                <div class="tab-pane container" id="menu2">
+                    <div class="row">
+                        {% for i in 1..12 %} {# to tez jest w sliderze #}
+                            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-12">
+                                {% include 'default/movie_preview.html.twig' with
+                                    {'title':'Nazwa filmu', 'categories':['category1','category2'], 'mark':4.5,'poster': '/images/sliderimg.jpg'}
+                                    only %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
 
         </div>
-    </div>
+    </section>
+
+    <section id="premieres" class="bg-page-dark-2 py-5">
+        <div class="container">
+            <h2>Expected premiere</h2>
+            <div class="row pt-4">
+                {% for i in 1..6 %} {# to tez jest w sliderze #}
+                    <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                        {% include 'default/movie_preview.html.twig' with
+                            {'title':'Nazwa filmu', 'categories':['category1','category2'], 'mark':4.5,'poster': '/images/sliderimg.jpg'}
+                        only %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section id="partners" class="bg-page-dark-1 pt-3 pb-5 border-after">
+        <div class="container">
+            <h2 class="py-3">Our Partners</h2>
+            <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using.</p>
+            <div class="row py-4">
+                {% for i in 1..6 %}
+                    <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                        <a href="#"><img src="/images/partner.png" class="img-fluid" alt=""></a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
 {% endblock %}
 
 {% block stylesheets %}
-<style>
-    body { background: #F5F5F5; font: 18px/1.5 sans-serif; }
-    h1, h2 { line-height: 1.2; margin: 0 0 .5em; }
-    h1 { font-size: 36px; }
-    h2 { font-size: 21px; margin-bottom: 1em; }
-    p { margin: 0 0 1em 0; }
-    a { color: #0000F0; }
-    a:hover { text-decoration: none; }
-    code { background: #F5F5F5; max-width: 100px; padding: 2px 6px; word-wrap: break-word; }
-    #wrapper { background: #FFF; margin: 1em auto; max-width: 800px; width: 95%; }
-    #container { padding: 2em; }
-    #welcome, #status { margin-bottom: 2em; }
-    #welcome h1 span { display: block; font-size: 75%; }
-    #icon-status, #icon-book { float: left; height: 64px; margin-right: 1em; margin-top: -4px; width: 64px; }
-    #icon-book { display: none; }
+    <style>
+    </style>
+{% endblock %}
 
-    @media (min-width: 768px) {
-        #wrapper { width: 80%; margin: 2em auto; }
-        #icon-book { display: inline-block; }
-        #status a, #next a { display: block; }
+{% block javascripts %}
+    <script src="{{ asset('js/bxSlider.js')}}"></script>
+    <script>
+        $(document).ready(function(){
+            const changeSliderBackground = function(object){
+                let image_id = object.attr('data-background-id');
+                $(`#slider .section-slider-background.opaque`).removeClass('opaque');
+                $(`#slider .section-slider-background[data-background-id=${image_id}]`).addClass('opaque');
+            };
 
-        @-webkit-keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
-        @keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
-        .sf-toolbar { opacity: 0; -webkit-animation: fade-in 1s .2s forwards; animation: fade-in 1s .2s forwards;}
-    }
-</style>
+            let item_amount = 4;
+            let item_width = ($('.slider').width()/item_amount).toFixed(2),
+                magin = 40,
+                options = {
+                    minSlides:item_amount,
+                    maxSlides:item_amount,
+                    moveSlides:1,
+                    slideMargin:magin,
+                    slideWidth: item_width,
+                    speed:1000,
+                    nextSelector:$('#slider-right'),
+                    nextText:'<i class="fas fa-arrow-right"></i>',
+                    prevSelector:$('#slider-left'),
+                    prevText:'<i class="fas fa-arrow-left"></i>',
+                    pager:false,
+                    onSlideBefore: function(currentSlide){
+                        changeSliderBackground(currentSlide);
+                    },
+                    onSliderLoad: function(){
+                        changeSliderBackground(this.getCurrentSlideElement());
+                    },
+                    //
+                };
+
+            let slider = $('.slider').bxSlider(options);
+
+            let cal, unit;
+            $(window).on('resize',function(){
+                item_width = ($('#slider').width()/item_amount).toFixed(2),
+                cal=$(this).width()/item_width|0;
+                unit=cal>item_amount ? item_amount : cal;
+
+                options = Object.assign(options, {
+                    maxSlides: unit,
+                    moveSlides: unit,
+                    slideWidth: item_width,
+                });
+                slider.reloadSlider(options);
+            });
+
+
+        });
+    </script>
 {% endblock %}

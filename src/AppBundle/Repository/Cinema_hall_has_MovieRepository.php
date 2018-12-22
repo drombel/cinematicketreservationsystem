@@ -10,4 +10,5 @@ namespace AppBundle\Repository;
  */
 class Cinema_hall_has_MovieRepository extends \Doctrine\ORM\EntityRepository
 {
+
 }

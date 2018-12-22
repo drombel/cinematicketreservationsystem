@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="bg-page-dark-2 pt-5 base_panel">
+        <div class="container">
+            <h1>Znajdź kino!</h1>
+            <div class="row flex-wrap">
+            {% for cinema in cinemas %}
+                <div class="col-6 col-xl-3 col-lg-3 col-md-4">
+                    <h2>{{ cinema.name }}</h2>
+                    <p>{{ cinema.city.name }}, ul. {{ cinema.street }} {{ cinema.streetNumber }}</p>
+                    <a href="{{ path('movies_by_cinema_list', { 'id': cinema.id }) }}">Zobacz co leci w kinie!</a>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

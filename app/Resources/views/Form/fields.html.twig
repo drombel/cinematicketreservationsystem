@@ -1,0 +1,25 @@
+{% extends 'form_div_layout.html.twig' %}
+
+{% block file_widget %}
+    {% spaceless %}
+
+        {{ block('form_widget') }}
+        {% if data.image_property is defined and data.image_property is not null %}
+            <img src="{{ asset(data.image_property) }}" class="img-fluid pt-4 d-block"/>
+        {% endif %}
+
+    {% endspaceless %}
+{% endblock %}
+
+{%- block form_row -%}
+    {%- set widget_attr = {} -%}
+    <div class="form-group pb-2 row">
+        <div class="col-12 col-md-4">
+            {{- form_label(form) -}}
+            {{- form_errors(form) -}}
+        </div>
+        <div class="col-12 col-md-8">
+            {{- form_widget(form, widget_attr) -}}
+        </div>
+    </div>
+{%- endblock form_row -%}

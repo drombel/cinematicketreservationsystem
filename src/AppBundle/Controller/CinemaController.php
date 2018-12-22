@@ -5,7 +5,8 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\Cinema;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;use Symfony\Component\HttpFoundation\Request;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Cinema controller.
@@ -27,6 +28,23 @@ class CinemaController extends Controller
         $cinemas = $em->getRepository('AppBundle:Cinema')->findAll();
 
         return $this->render('cinema/index.html.twig', array(
+            'cinemas' => $cinemas,
+        ));
+    }
+
+    /**
+     * Lists all cinema entities.
+     *
+     * @Route("/all", name="cinema_all_index")
+     * @Method("GET")
+     */
+    public function allAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $cinemas = $em->getRepository('AppBundle:Cinema')->findAllWithCity();
+
+        return $this->render('cinema/index_all.html.twig', array(
             'cinemas' => $cinemas,
         ));
     }
@@ -98,6 +116,8 @@ class CinemaController extends Controller
         ));
     }
 
+
+
     /**
      * Deletes a cinema entity.
      *
@@ -117,6 +137,8 @@ class CinemaController extends Controller
 
         return $this->redirectToRoute('cinema_index');
     }
+
+
 
     /**
      * Creates a form to delete a cinema entity.

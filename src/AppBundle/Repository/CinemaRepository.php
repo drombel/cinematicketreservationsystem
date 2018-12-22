@@ -10,4 +10,11 @@ namespace AppBundle\Repository;
  */
 class CinemaRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findAllWithCity()
+    {
+        return $this->createQueryBuilder('p')
+            ->innerJoin('p.city', 'c')
+            ->addSelect('c')
+            ->getQuery()->getResult();
+    }
 }

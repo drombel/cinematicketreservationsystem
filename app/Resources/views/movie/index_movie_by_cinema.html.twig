@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="bg-page-dark-2 px-sm-5 px-2 py-5 base_panel position-relative movie-main">
+        <img src="/{{ movie.scene }}" alt="{{ movie.title }}" class="movie-main-background d-md-block d-none">
+        <div class="container movie-main-container">
+            <h1 class="font-weight-bold">Zobacz czy zdążysz na film!</h1>
+            <div class="row flex-wrap py-4">
+                <div class="col-12 col-xs-12 col-sm-4">
+                    <img src="/{{ movie.poster }}" alt="{{ movie.title }}" class="img-fluid w-100">
+                </div>
+                <div class="col-12 col-xs-12 col-sm-8 pt-sm-0 pt-2 movie-main-description rounded">
+                    <h1 class="font-weight-bold">{{ movie.title }}</h1>
+                    <p>{{ movie.description }}</p>
+                    <h5>Cena: {{ movie.price }}</h5>
+                    <p>{{ cinema.name }}</p>
+                    <button class="btn btn-dark text-uppercase">zamów bilet</button>
+                    #kolejna czesc to zrobic te siedzenia itd
+                </div>
+            </div>
+            <div>
+                #w tym kinie tez grajo
+            </div>
+        </div>
+    </div>
+{% endblock %}

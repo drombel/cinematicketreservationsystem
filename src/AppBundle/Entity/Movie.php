@@ -3,6 +3,7 @@
 namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Movie
@@ -31,15 +32,39 @@ class Movie
     /**
      * @var string
      *
-     * @ORM\Column(name="description", type="text", nullable=true)
+     * @ORM\Column(name="description", type="text")
      */
     private $description;
 
     /**
-     //* @ORM\OneToOne(targetEntity="MovieImages")
-     //* @ORM\JoinColumn(name="imagesId", nullable = true)
+     * @var string
+     *
+     * @ORM\Column(name="poster", type="string", length=255, nullable = true)
+     * @Assert\Image(
+     *     minWidth = 270,
+     *     maxWidth = 1350,
+     *     minHeight = 400,
+     *     maxHeight = 2000,
+     *     minRatio = 0.6,
+     *     maxRatio = 0.8
+     * )
      */
-    private $images;
+    private $poster;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="scene", type="string", length=255, nullable = true)
+     * @Assert\Image(
+     *     minWidth = 1600,
+     *     maxWidth = 3360,
+     *     minHeight = 900,
+     *     maxHeight = 2100,
+     *     minRatio = 1.5,
+     *     maxRatio = 1.65
+     * )
+     */
+    private $scene;
 
     /**
      * @var string
@@ -108,12 +133,45 @@ class Movie
     }
 
     /**
+     * @return string
+     */
+    public function getPoster()
+    {
+        return $this->poster;
+    }
+
+    /**
+     * @param string $poster
+     */
+    public function setPoster($poster)
+    {
+        $this->poster = $poster;
+    }
+
+    /**
+     * @return string
+     */
+    public function getScene()
+    {
+        return $this->scene;
+    }
+
+    /**
+     * @param string $scene
+     */
+    public function setScene($scene)
+    {
+        $this->scene = $scene;
+    }
+
+    /**
      * Set price
      *
      * @param string $price
      *
      * @return Movie
      */
+
     public function setPrice($price)
     {
         $this->price = $price;
@@ -134,18 +192,6 @@ class Movie
     /**
      * @return mixed
      */
-    public function getImages()
-    {
-        return $this->images;
-    }
-
-    /**
-     * @param mixed $images
-     */
-    public function setImages($images)
-    {
-        $this->images = $images;
-    }
 
 }
 

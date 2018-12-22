@@ -5,7 +5,8 @@ namespace AppBundle\Controller;
 use AppBundle\Entity\City;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;use Symfony\Component\HttpFoundation\Request;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * City controller.
@@ -133,4 +134,5 @@ class CityController extends Controller
             ->getForm()
         ;
     }
+
 }

@@ -33,9 +33,16 @@ class Cinema_hall_has_Movie
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="time", type="datetime")
+     * @ORM\Column(name="time_start", type="datetime")
      */
-    private $time;
+    private $timeStart;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="time_end", type="datetime")
+     */
+    private $timeEnd;
 
     /**
      * Set movieId
@@ -88,13 +95,13 @@ class Cinema_hall_has_Movie
     /**
      * Set time
      *
-     * @param \DateTime $time
+     * @param \DateTime $timeStart
      *
      * @return Cinema_hall_has_Movie
      */
-    public function setTime($time)
+    public function setTimeStart($timeStart)
     {
-        $this->time = $time;
+        $this->timeStart = $timeStart;
 
         return $this;
     }
@@ -104,9 +111,33 @@ class Cinema_hall_has_Movie
      *
      * @return \DateTime
      */
-    public function getTime()
+    public function getTimeStart()
     {
-        return $this->time;
+        return $this->timeStart;
+    }
+
+    /**
+     * Set time
+     *
+     * @param \DateTime $timeEnd
+     *
+     * @return Cinema_hall_has_Movie
+     */
+    public function setTimeEnd($timeEnd)
+    {
+        $this->timeEnd = $timeEnd;
+
+        return $this;
+    }
+
+    /**
+     * Get time
+     *
+     * @return \DateTime
+     */
+    public function getTimeEnd()
+    {
+        return $this->timeEnd;
     }
 }
 

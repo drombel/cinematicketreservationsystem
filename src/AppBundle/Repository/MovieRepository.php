@@ -10,4 +10,16 @@ namespace AppBundle\Repository;
  */
 class MovieRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function findAllByCinema($cinemaId)
+    {
+        $query = $this->getEntityManager()
+            ->createQuery(
+                'SELECT m FROM AppBundle:Movie m WHERE m.id IN (
+                        SELECT cm.movieId FROM AppBundle:Cinema_hall_has_Movie cm WHERE cm.cinemaHallId IN (
+                            SELECT ch.id FROM AppBundle:Cinema_hall ch WHERE ch.cinemaId = :id
+                        )
+                    )'
+            )->setParameter('id', $cinemaId);
+        return $query->getResult();
+    }
 }

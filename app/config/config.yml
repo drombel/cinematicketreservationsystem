@@ -6,12 +6,11 @@ imports:
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
-    locale: pl
-    movie_images_orginal_directory: '%kernel.project_dir%/web/uploads/movie_images_orginal'
-    movie_images_extra_directory: '%kernel.project_dir%/web/uploads/movie_images_extra'
-    movie_images_large_directory: '%kernel.project_dir%/web/uploads/movie_images_large'
-    movie_images_normal_directory: '%kernel.project_dir%/web/uploads/movie_images_normal'
-    movie_images_small_directory: '%kernel.project_dir%/web/uploads/movie_images_small'
+    locale: en
+    movie_images_poster_directory: '%kernel.project_dir%/web/uploads/movie_images_poster/'
+    movie_images_poster_web_directory: 'uploads/movie_images_poster/'
+    movie_images_scene_directory: '%kernel.project_dir%/web/uploads/movie_images_scene/'
+    movie_images_scene_web_directory: 'uploads/movie_images_scene/'
 
 framework:
     #esi: ~
@@ -40,7 +39,8 @@ framework:
 twig:
     debug: '%kernel.debug%'
     strict_variables: '%kernel.debug%'
-
+    form_themes:
+    - 'form/fields.html.twig'
 # Doctrine Configuration
 doctrine:
     dbal:

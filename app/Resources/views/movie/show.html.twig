@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'base_panel.html.twig' %}
 
 {% block body %}
     <h1>Movie</h1>
@@ -20,6 +20,14 @@
             <tr>
                 <th>Price</th>
                 <td>{{ movie.price }}</td>
+            </tr>
+            <tr>
+                <th>Poster</th>
+                <td><a href="{{ asset(movie.poster) }}"><br><img src="{{ asset(movie.poster) }}" alt="{{ movie.poster }}" class="img-fluid"></a></td>
+            </tr>
+            <tr>
+                <th>Scene</th>
+                <td><a href="{{ asset(movie.scene) }}"><br><img src="{{ asset(movie.scene) }}" alt="{{ movie.scene }}"  class="img-fluid"></a></td>
             </tr>
         </tbody>
     </table>
