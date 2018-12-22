@@ -1,0 +1,16 @@
+{% if not (link is defined) %}
+    {% set link = '#' %}
+{% endif %}
+<div class="movie-preview">
+    <div class="movie-preview-image">
+        <img src="{{ poster }}" class="img-fluid" alt="">
+        <a class="movie-preview-hover" href="{{ link }}">
+            <i class="far fa-play-circle"></i>
+        </a>
+    </div>
+    <div class="movie-preview-text pt-3">
+        <h4>{{ title }}</h4>
+        <p>{{ categories|join(', ') }}</p>
+        <p><span>#</span> {{ mark }}</p>
+    </div>
+</div>
