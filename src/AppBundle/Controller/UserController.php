@@ -6,6 +6,7 @@ use AppBundle\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
@@ -32,9 +33,23 @@ class UserController extends Controller
 
             return $this->render('user/index.html.twig', array(
                 'users' => $users,
+                'city' => '',
+                'role' => 'admin'
+            ));
+        } elseif($loggedUserRole === 'moderator') {
+            $em = $this->getDoctrine()->getManager();
+            $city = $this->getUser()->getCity()->getId();
+            $cityName = $this->getUser()->getCity()->getName();
+            $cinemas = $em->getRepository('AppBundle:Cinema')->findBy(array('city' => $city));
+            $users = $em->getRepository('AppBundle:User')->findBy(array('cinema' => $cinemas));
+
+            return $this->render('user/index.html.twig', array(
+                'users' => $users,
+                'city' => $cityName,
+                'role' => 'moderator'
             ));
         } else {
-            return $this->redirect('http://localhost:8080/cinematicketreservationsystem/web/app_dev.php');
+            return $this->redirectToRoute('homepage');
         }
 
     }
@@ -97,7 +112,7 @@ class UserController extends Controller
 
            return $this->render('login/login.html.twig', array(
                'errors' => $errors,
-               'email' => $lastUsername,
+               'email' => $lastUsername
            ));
     }
 
@@ -121,14 +136,15 @@ class UserController extends Controller
     {
         $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        if($loggedUserRole === 'admin') {
+        if($loggedUserRole === 'admin' || $loggedUserRole === 'moderator') {
             $deleteForm = $this->createDeleteForm($user);
             return $this->render('user/show.html.twig', array(
                 'user' => $user,
                 'delete_form' => $deleteForm->createView(),
+                'loggedUserRole' => $loggedUserRole,
             ));
         } else {
-            return $this->redirect('http://localhost:8080/cinematicketreservationsystem/web/app_dev.php');
+            return $this->redirectToRoute('homepage');
         }
     }
 
@@ -145,7 +161,7 @@ class UserController extends Controller
 
         $deleteForm = $this->createDeleteForm($user);
 
-        if($loggedUserRole === 'client' && strval($loggedUserId) === $id) {
+        if($loggedUserRole !== 'admin' && strval($loggedUserId) === $id) {
 
             $editUserForm = $this->createForm('AppBundle\Form\UserUpdateType');
             $editUserForm->handleRequest($request);
@@ -198,9 +214,45 @@ class UserController extends Controller
 
         } elseif($loggedUserRole === 'client' && strval($loggedUserId) !== $id) {
 
-            return $this->redirect('http://localhost:8080/cinematicketreservationsystem/web/app_dev.php');
+            return $this->redirectToRoute('homepage');
 
-        } else {
+        } elseif($loggedUserRole === 'moderator' && strval($loggedUserId) !== $id) {
+
+            $em = $this->getDoctrine()->getManager();
+            $city = $this->getUser()->getCity()->getId();
+            $cinemas = $em->getRepository('AppBundle:Cinema')->findBy(array('city' => $city));
+            $users = $em->getRepository('AppBundle:User')->findBy(array('cinema' => $cinemas));
+            $ids = array();
+
+            foreach($users as $userId)
+            {
+                $ids[] = strval($userId->getId());
+            }
+
+            if (in_array($id, $ids)) {
+
+                $editForm = $this->createForm('AppBundle\Form\UserUpdateModeratorType', $user);
+                $editForm->handleRequest($request);
+
+                if ($editForm->isSubmitted() && $editForm->isValid()) {
+                    $this->getDoctrine()->getManager()->flush();
+
+                    return $this->redirectToRoute('user_edit', array('id' => $user->getId()));
+                }
+
+                return $this->render('user/edit.html.twig', array(
+                    'loggedUserRole' => $loggedUserRole,
+                    'user' => $user,
+                    'edit_form' => $editForm->createView(),
+                    'delete_form' => $deleteForm->createView(),
+                ));
+
+            } else {
+
+                return $this->redirectToRoute('user_index');
+
+            }
+        }  else {
 
             $editForm = $this->createForm('AppBundle\Form\UserUpdateAdminType', $user);
             $editForm->handleRequest($request);
@@ -244,7 +296,7 @@ class UserController extends Controller
 
             return $this->redirectToRoute('user_index');
         } else {
-            return $this->redirect('http://localhost:8080/cinematicketreservationsystem/web/app_dev.php');
+            return $this->redirectToRoute('homepage');
         }
     }
 

@@ -75,6 +75,18 @@ class User implements UserInterface
      */
     private $role;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Cinema")
+     * @ORM\JoinColumn(name="cinemaId", nullable = true)
+     */
+    private $cinema;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="City")
+     * @ORM\JoinColumn(name="cityId", nullable = true)
+     */
+    private $city;
+
 
     /**
      * Get id
@@ -252,6 +264,54 @@ class User implements UserInterface
     public function getRole()
     {
         return $this->role;
+    }
+
+    /**
+     * Set cienemaId
+     *
+     * @param \stdClass $cinema
+     *
+     * @return User
+     */
+    public function setCinema($cinema)
+    {
+        $this->cinema = $cinema;
+
+        return $this;
+    }
+
+    /**
+     * Get cinemaId
+     *
+     * @return \stdClass
+     */
+    public function getCinema()
+    {
+        return $this->cinema;
+    }
+
+    /**
+     * Set cityId
+     *
+     * @param \stdClass $city
+     *
+     * @return User
+     */
+    public function setCity($city)
+    {
+        $this->city = $city;
+
+        return $this;
+    }
+
+    /**
+     * Get cityId
+     *
+     * @return \stdClass
+     */
+    public function getCity()
+    {
+        return $this->city;
     }
 
     /**

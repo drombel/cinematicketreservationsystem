@@ -1,7 +1,7 @@
 {% extends 'base_panel.html.twig' %}
 
 {% block body %}
-    <h1>User</h1>
+    <h1>Użytkownik</h1>
 
     <table>
         <tbody>
@@ -33,20 +33,20 @@
                 <th>Role</th>
                 <td>{{ user.role }}</td>
             </tr>
+            <tr>
+                <th>Cinema</th>
+                <td>{{ user.cinema }}</td>
+            </tr>
+
         </tbody>
     </table>
 
-    <ul>
-        <li>
-            <a href="{{ path('user_index') }}">Powróć do listy</a>
-        </li>
-        <li>
-            <a href="{{ path('user_edit', { 'id': user.id }) }}">Edytuj</a>
-        </li>
-        <li>
-            {{ form_start(delete_form) }}
-                <input type="submit" value="Usuń">
-            {{ form_end(delete_form) }}
-        </li>
-    </ul>
+    <br><a href="{{ path('user_index') }}"><input type="button" class="btn btn-light" value="Powrót do listy"></a>
+    <a href="{{ path('user_edit', { 'id': user.id }) }}"><input type="button" class="btn btn-success" value="Edytuj"></a>
+    {% if loggedUserRole == 'admin' %}
+        {{ form_start(delete_form) }}
+            <input class="btn btn-danger" type="submit" value="Usuń">
+        {{ form_end(delete_form) }}
+    {% endif %}
+
 {% endblock %}

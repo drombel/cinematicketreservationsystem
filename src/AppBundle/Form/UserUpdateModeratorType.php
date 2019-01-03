@@ -2,8 +2,8 @@
 /**
  * Created by PhpStorm.
  * User: Julek
- * Date: 2018-12-02
- * Time: 17:55
+ * Date: 2019-01-03
+ * Time: 20:43
  */
 
 namespace AppBundle\Form;
@@ -17,7 +17,7 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 
-class UserUpdateAdminType extends AbstractType
+class UserUpdateModeratorType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
@@ -25,17 +25,21 @@ class UserUpdateAdminType extends AbstractType
             ->add('name', TextType::class, array(
                 'label' => 'Imię',
                 'attr' => array('class' => 'form-control', 'autofocus' => true),
+                'disabled' => true,
             ))
             ->add('surname', TextType::class, array(
                 'label' => 'Nazwisko',
                 'attr' => array('class' => 'form-control'),
+                'disabled' => true,
             ))
             ->add('email', EmailType::class, array(
                 'label' => 'E-mail',
                 'attr' => array('class' => 'form-control'),
+                'disabled' => true,
             ))
             ->add('password', TextType::class, array(
                 'label' => 'Hasło',
+                'disabled' => true,
             ))
             ->add('emailActivate', ChoiceType::class, array(
                 'label' => 'Czy aktywny',
@@ -43,15 +47,15 @@ class UserUpdateAdminType extends AbstractType
                     'TAK' => true,
                     'NIE' => false,
                 ),
+                'disabled' => true,
             ))
             ->add('activationToken', TextType::class, array(
                 'label' => 'Token',
+                'disabled' => true,
             ))
             ->add('role', ChoiceType::class, array(
                 'label' => 'Uprawnienia',
                 'choices'  => array(
-                    'Admin' => 'admin',
-                    'Moderator' => 'moderator',
                     'Supervisor' => 'supervisor',
                     'Client' => 'client',
                 ),
@@ -78,7 +82,7 @@ class UserUpdateAdminType extends AbstractType
                 'required' => false,
                 'placeholder' => ''
             ))
-        ->add('submit', SubmitType::class, array(
+            ->add('submit', SubmitType::class, array(
                 'label' => 'Aktualizuj',
                 'attr' => array('class' => 'btn btn-success pull-right')
             ));

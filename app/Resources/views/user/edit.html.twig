@@ -2,7 +2,7 @@
 
 {% block body %}
 
-    {% if loggedUserRole == 'admin' %}
+    {% if loggedUserRole == 'admin' or loggedUserRole == 'moderator' %}
         <h1>Edycja użytkownika</h1>
     {% else %}
         <h1>Zmień email lub hasło</h1>
@@ -12,17 +12,13 @@
         {{ form_widget(edit_form) }}
     {{ form_end(edit_form) }}
 
-    {% if loggedUserRole == 'admin' %}
-        <ul>
-            <li>
-                <a href="{{ path('user_index') }}">Powrót do listy</a>
-            </li>
-            <li>
-                {{ form_start(delete_form) }}
-                    <input type="submit" value="Usuń">
-                {{ form_end(delete_form) }}
-            </li>
-        </ul>
+    {% if loggedUserRole == 'admin' or loggedUserRole == 'moderator' %}
+        <br><a href="{{ path('user_index') }}"><input type="button" class="btn btn-light" value="Powrót do listy"></a><br><br>
+        {% if loggedUserRole == 'admin' %}
+            {{ form_start(delete_form) }}
+                <input class="btn btn-danger pull-right" type="submit" value="Usuń">
+            {{ form_end(delete_form) }}
+        {% endif %}
     {%  endif %}
 
 {% endblock %}
