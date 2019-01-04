@@ -13,7 +13,7 @@ class CinemaType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('name')->add('street')->add('streetNumber')->add('zipcode')->add('cityId');
+        $builder->add('name')->add('street')->add('streetNumber')->add('zipcode')->add('city');
     }
     
     /**

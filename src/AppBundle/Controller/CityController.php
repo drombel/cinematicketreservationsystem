@@ -23,13 +23,19 @@ class CityController extends Controller
      */
     public function indexAction()
     {
-        $em = $this->getDoctrine()->getManager();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        $cities = $em->getRepository('AppBundle:City')->findAll();
+        if($loggedUserRole === 'admin') {
+            $em = $this->getDoctrine()->getManager();
 
-        return $this->render('city/index.html.twig', array(
-            'cities' => $cities,
-        ));
+            $cities = $em->getRepository('AppBundle:City')->findAll();
+
+            return $this->render('city/index.html.twig', array(
+                'cities' => $cities,
+            ));
+        } else {
+            return $this->redirectToRoute('homepage');
+        }
     }
 
     /**
@@ -40,22 +46,28 @@ class CityController extends Controller
      */
     public function newAction(Request $request)
     {
-        $city = new City();
-        $form = $this->createForm('AppBundle\Form\CityType', $city);
-        $form->handleRequest($request);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($city);
-            $em->flush();
+        if($loggedUserRole === 'admin') {
+            $city = new City();
+            $form = $this->createForm('AppBundle\Form\CityType', $city);
+            $form->handleRequest($request);
 
-            return $this->redirectToRoute('city_show', array('id' => $city->getId()));
+            if ($form->isSubmitted() && $form->isValid()) {
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($city);
+                $em->flush();
+
+                return $this->redirectToRoute('city_show', array('id' => $city->getId()));
+            }
+
+            return $this->render('city/new.html.twig', array(
+                'city' => $city,
+                'form' => $form->createView(),
+            ));
+        } else {
+            return $this->redirectToRoute('homepage');
         }
-
-        return $this->render('city/new.html.twig', array(
-            'city' => $city,
-            'form' => $form->createView(),
-        ));
     }
 
     /**
@@ -66,12 +78,18 @@ class CityController extends Controller
      */
     public function showAction(City $city)
     {
-        $deleteForm = $this->createDeleteForm($city);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        return $this->render('city/show.html.twig', array(
-            'city' => $city,
-            'delete_form' => $deleteForm->createView(),
-        ));
+        if($loggedUserRole === 'admin') {
+            $deleteForm = $this->createDeleteForm($city);
+
+            return $this->render('city/show.html.twig', array(
+                'city' => $city,
+                'delete_form' => $deleteForm->createView(),
+            ));
+        } else {
+            return $this->redirectToRoute('homepage');
+        }
     }
 
     /**
@@ -82,21 +100,27 @@ class CityController extends Controller
      */
     public function editAction(Request $request, City $city)
     {
-        $deleteForm = $this->createDeleteForm($city);
-        $editForm = $this->createForm('AppBundle\Form\CityType', $city);
-        $editForm->handleRequest($request);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+        if($loggedUserRole === 'admin') {
+            $deleteForm = $this->createDeleteForm($city);
+            $editForm = $this->createForm('AppBundle\Form\CityType', $city);
+            $editForm->handleRequest($request);
 
-            return $this->redirectToRoute('city_edit', array('id' => $city->getId()));
+            if ($editForm->isSubmitted() && $editForm->isValid()) {
+                $this->getDoctrine()->getManager()->flush();
+
+                return $this->redirectToRoute('city_edit', array('id' => $city->getId()));
+            }
+
+            return $this->render('city/edit.html.twig', array(
+                'city' => $city,
+                'edit_form' => $editForm->createView(),
+                'delete_form' => $deleteForm->createView(),
+            ));
+        } else {
+            return $this->redirectToRoute('homepage');
         }
-
-        return $this->render('city/edit.html.twig', array(
-            'city' => $city,
-            'edit_form' => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
-        ));
     }
 
     /**
@@ -107,16 +131,22 @@ class CityController extends Controller
      */
     public function deleteAction(Request $request, City $city)
     {
-        $form = $this->createDeleteForm($city);
-        $form->handleRequest($request);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($city);
-            $em->flush();
+        if($loggedUserRole === 'admin') {
+            $form = $this->createDeleteForm($city);
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $em = $this->getDoctrine()->getManager();
+                $em->remove($city);
+                $em->flush();
+            }
+
+            return $this->redirectToRoute('city_index');
+        } else {
+            return $this->redirectToRoute('homepage');
         }
-
-        return $this->redirectToRoute('city_index');
     }
 
     /**

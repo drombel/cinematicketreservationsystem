@@ -1,47 +1,44 @@
 {% extends 'base_panel.html.twig' %}
 
 {% block body %}
-    <h1>Movies list</h1>
+    <h1>Lista filmów</h1>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Title</th>
-                <th>Description</th>
-                <th>Price</th>
-                <th>Poster</th>
-                <th>Scene</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for movie in movies %}
-            <tr>
-                <td><a href="{{ path('movie_show', { 'id': movie.id }) }}">{{ movie.id }}</a></td>
-                <td>{{ movie.title }}</td>
-                <td>{{ movie.description }}</td>
-                <td>{{ movie.price }}</td>
-                <td><img src="{{ asset(movie.poster) }}" alt="{{ movie.poster }}" class="img-fluid"></td>
-                <td><img src="{{ asset(movie.scene) }}" alt="{{ movie.scene }}" class="img-fluid"></td>
-                <td>
-                    <ul>
-                        <li>
-                            <a href="{{ path('movie_show', { 'id': movie.id }) }}">show</a>
-                        </li>
-                        <li>
-                            <a href="{{ path('movie_edit', { 'id': movie.id }) }}">edit</a>
-                        </li>
-                    </ul>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
 
-    <ul>
-        <li>
-            <a href="{{ path('movie_new') }}">Create a new movie</a>
-        </li>
-    </ul>
+            <a href="{{ path('movie_new') }}">Dodaj nowy film</a><br><br>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Price</th>
+                    <th>Poster</th>
+                    <th>Scene</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for movie in movies %}
+                <tr>
+                    <td>{{ movie.title }}</td>
+                    <td>{{ movie.description }}</td>
+                    <td>{{ movie.price }}</td>
+                    <td><img src="{{ asset(movie.poster) }}" alt="{{ movie.poster }}" class="img-fluid"></td>
+                    <td><img src="{{ asset(movie.scene) }}" alt="{{ movie.scene }}" class="img-fluid"></td>
+                    <td>
+                        <ul>
+                            <li>
+                                <a href="{{ path('movie_show', { 'id': movie.id }) }}">Pokaż</a>
+                            </li>
+                            <li>
+                                <a href="{{ path('movie_edit', { 'id': movie.id }) }}">Edytuj</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

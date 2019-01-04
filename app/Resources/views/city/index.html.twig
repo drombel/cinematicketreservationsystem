@@ -1,39 +1,35 @@
 {% extends 'base_panel.html.twig' %}
 
 {% block body %}
-    <h1>Cities list</h1>
+    <h1>Lista miast</h1>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for city in cities %}
-            <tr>
-                <td><a href="{{ path('city_show', { 'id': city.id }) }}">{{ city.id }}</a></td>
-                <td>{{ city.name }}</td>
-                <td>
-                    <ul>
-                        <li>
-                            <a href="{{ path('city_show', { 'id': city.id }) }}">show</a>
-                        </li>
-                        <li>
-                            <a href="{{ path('city_edit', { 'id': city.id }) }}">edit</a>
-                        </li>
-                    </ul>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <a href="{{ path('city_new') }}">Dodaj miasto</a><br><br>
 
-    <ul>
-        <li>
-            <a href="{{ path('city_new') }}">Create a new city</a>
-        </li>
-    </ul>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for city in cities %}
+                <tr>
+                    <td>{{ city.name }}</td>
+                    <td>
+                        <ul>
+                            <li>
+                                <a href="{{ path('city_show', { 'id': city.id }) }}">Pokaż</a>
+                            </li>
+                            <li>
+                                <a href="{{ path('city_edit', { 'id': city.id }) }}">Edytuj</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

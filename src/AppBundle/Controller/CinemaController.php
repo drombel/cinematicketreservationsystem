@@ -23,13 +23,19 @@ class CinemaController extends Controller
      */
     public function indexAction()
     {
-        $em = $this->getDoctrine()->getManager();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        $cinemas = $em->getRepository('AppBundle:Cinema')->findAll();
+        if($loggedUserRole === 'admin' || $loggedUserRole === 'moderator') {
+            $em = $this->getDoctrine()->getManager();
 
-        return $this->render('cinema/index.html.twig', array(
-            'cinemas' => $cinemas,
-        ));
+            $cinemas = $em->getRepository('AppBundle:Cinema')->findAll();
+
+            return $this->render('cinema/index.html.twig', array(
+                'cinemas' => $cinemas,
+            ));
+        } else {
+            return $this->redirectToRoute('homepage');
+        }
     }
 
     /**
@@ -57,22 +63,28 @@ class CinemaController extends Controller
      */
     public function newAction(Request $request)
     {
-        $cinema = new Cinema();
-        $form = $this->createForm('AppBundle\Form\CinemaType', $cinema);
-        $form->handleRequest($request);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($cinema);
-            $em->flush();
+        if($loggedUserRole === 'admin' || $loggedUserRole === 'moderator') {
+            $cinema = new Cinema();
+            $form = $this->createForm('AppBundle\Form\CinemaType', $cinema);
+            $form->handleRequest($request);
 
-            return $this->redirectToRoute('cinema_show', array('id' => $cinema->getId()));
+            if ($form->isSubmitted() && $form->isValid()) {
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($cinema);
+                $em->flush();
+
+                return $this->redirectToRoute('cinema_show', array('id' => $cinema->getId()));
+            }
+
+            return $this->render('cinema/new.html.twig', array(
+                'cinema' => $cinema,
+                'form' => $form->createView(),
+            ));
+        } else {
+            return $this->redirectToRoute('homepage');
         }
-
-        return $this->render('cinema/new.html.twig', array(
-            'cinema' => $cinema,
-            'form' => $form->createView(),
-        ));
     }
 
     /**
@@ -83,12 +95,18 @@ class CinemaController extends Controller
      */
     public function showAction(Cinema $cinema)
     {
-        $deleteForm = $this->createDeleteForm($cinema);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        return $this->render('cinema/show.html.twig', array(
-            'cinema' => $cinema,
-            'delete_form' => $deleteForm->createView(),
-        ));
+        if($loggedUserRole === 'admin' || $loggedUserRole === 'moderator') {
+            $deleteForm = $this->createDeleteForm($cinema);
+
+            return $this->render('cinema/show.html.twig', array(
+                'cinema' => $cinema,
+                'delete_form' => $deleteForm->createView(),
+            ));
+        } else {
+            return $this->redirectToRoute('homepage');
+        }
     }
 
     /**
@@ -99,21 +117,27 @@ class CinemaController extends Controller
      */
     public function editAction(Request $request, Cinema $cinema)
     {
-        $deleteForm = $this->createDeleteForm($cinema);
-        $editForm = $this->createForm('AppBundle\Form\CinemaType', $cinema);
-        $editForm->handleRequest($request);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+        if($loggedUserRole === 'admin' || $loggedUserRole === 'moderator') {
+            $deleteForm = $this->createDeleteForm($cinema);
+            $editForm = $this->createForm('AppBundle\Form\CinemaType', $cinema);
+            $editForm->handleRequest($request);
 
-            return $this->redirectToRoute('cinema_edit', array('id' => $cinema->getId()));
+            if ($editForm->isSubmitted() && $editForm->isValid()) {
+                $this->getDoctrine()->getManager()->flush();
+
+                return $this->redirectToRoute('cinema_edit', array('id' => $cinema->getId()));
+            }
+
+            return $this->render('cinema/edit.html.twig', array(
+                'cinema' => $cinema,
+                'edit_form' => $editForm->createView(),
+                'delete_form' => $deleteForm->createView(),
+            ));
+        } else {
+            return $this->redirectToRoute('homepage');
         }
-
-        return $this->render('cinema/edit.html.twig', array(
-            'cinema' => $cinema,
-            'edit_form' => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
-        ));
     }
 
 
@@ -126,16 +150,22 @@ class CinemaController extends Controller
      */
     public function deleteAction(Request $request, Cinema $cinema)
     {
-        $form = $this->createDeleteForm($cinema);
-        $form->handleRequest($request);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($cinema);
-            $em->flush();
+        if($loggedUserRole === 'admin' || $loggedUserRole === 'moderator') {
+            $form = $this->createDeleteForm($cinema);
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $em = $this->getDoctrine()->getManager();
+                $em->remove($cinema);
+                $em->flush();
+            }
+
+            return $this->redirectToRoute('cinema_index');
+        } else {
+            return $this->redirectToRoute('homepage');
         }
-
-        return $this->redirectToRoute('cinema_index');
     }
 
 

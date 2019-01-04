@@ -29,15 +29,22 @@ class MovieController extends Controller
      */
     public function indexAction()
     {
-        $em = $this->getDoctrine()->getManager();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        $movies = $em->getRepository('AppBundle:Movie')->findAll();
+        if($loggedUserRole !== 'client') {
 
-        $movies = $this->setImages($movies);
+            $em = $this->getDoctrine()->getManager();
 
-        return $this->render('movie/index.html.twig', array(
-            'movies' => $movies,
-        ));
+            $movies = $em->getRepository('AppBundle:Movie')->findAll();
+
+            $movies = $this->setImages($movies);
+
+            return $this->render('movie/index.html.twig', array(
+                'movies' => $movies,
+            ));
+        } else {
+            return $this->redirectToRoute('homepage');
+        }
     }
 
     /**
@@ -76,10 +83,12 @@ class MovieController extends Controller
         $cinema = $em->find(Cinema::class, $cinemaId);
 
         $movie = $this->setImages($movie)[0];
+        $moviePriceDisc = $movie->getPrice()*0.8;
 
         return $this->render('movie/index_movie_by_cinema.html.twig', array(
             'movie' => $movie,
             'cinema' => $cinema,
+            'moviePriceDisc' => $moviePriceDisc
         ));
     }
 
@@ -91,35 +100,41 @@ class MovieController extends Controller
      */
     public function newAction(Request $request)
     {
-        $movie = new Movie();
-        $form = $this->createForm('AppBundle\Form\MovieType', $movie);
-        $form->handleRequest($request);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if($loggedUserRole !== 'client') {
+            $movie = new Movie();
+            $form = $this->createForm('AppBundle\Form\MovieType', $movie);
+            $form->handleRequest($request);
 
-            $currentImage = $movie->getPoster();
-            if($currentImage){
-                $orginalUploader = new FileUploader($this->getParameter('movie_images_poster_directory'));
-                $movie->setPoster($orginalUploader->upload($currentImage));
+            if ($form->isSubmitted() && $form->isValid()) {
+
+                $currentImage = $movie->getPoster();
+                if ($currentImage) {
+                    $orginalUploader = new FileUploader($this->getParameter('movie_images_poster_directory'));
+                    $movie->setPoster($orginalUploader->upload($currentImage));
+                }
+
+                $currentImage = $movie->getScene();
+                if ($currentImage) {
+                    $extraUploader = new FileUploader($this->getParameter('movie_images_scene_directory'));
+                    $movie->setScene($extraUploader->upload($currentImage));
+                }
+
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($movie);
+                $em->flush();
+
+                return $this->redirectToRoute('movie_show', array('id' => $movie->getId()));
             }
 
-            $currentImage = $movie->getScene();
-            if($currentImage){
-                $extraUploader = new FileUploader($this->getParameter('movie_images_scene_directory'));
-                $movie->setScene($extraUploader->upload($currentImage));
-            }
-
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($movie);
-            $em->flush();
-
-            return $this->redirectToRoute('movie_show', array('id' => $movie->getId()));
+            return $this->render('movie/new.html.twig', array(
+                'movie' => $movie,
+                'form' => $form->createView(),
+            ));
+        } else {
+            return $this->redirectToRoute('homepage');
         }
-
-        return $this->render('movie/new.html.twig', array(
-            'movie' => $movie,
-            'form' => $form->createView(),
-        ));
     }
 
     /**
@@ -130,15 +145,21 @@ class MovieController extends Controller
      */
     public function showAction(Movie $movie)
     {
-        $deleteForm = $this->createDeleteForm($movie);
-        //$images = $this->getImages($movie);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        $movie = $this->setImages($movie)[0];
+        if($loggedUserRole !== 'client') {
+            $deleteForm = $this->createDeleteForm($movie);
+            //$images = $this->getImages($movie);
 
-        return $this->render('movie/show.html.twig', array(
-            'movie' => $movie,
-            'delete_form' => $deleteForm->createView(),
-        ));
+            $movie = $this->setImages($movie)[0];
+
+            return $this->render('movie/show.html.twig', array(
+                'movie' => $movie,
+                'delete_form' => $deleteForm->createView(),
+            ));
+        } else {
+            return $this->redirectToRoute('homepage');
+        }
     }
 
     /**
@@ -149,35 +170,41 @@ class MovieController extends Controller
      */
     public function editAction(Request $request, Movie $movie)
     {
-        $images = $this->getImages($movie);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        if(isset($images['poster'])){
-            $file = new File($images['poster']['serverPath']);
-            $file->image_property = $images['poster']['webPath'];
-            $movie->setPoster($file);
+        if($loggedUserRole !== 'client') {
+            $images = $this->getImages($movie);
+
+            if (isset($images['poster'])) {
+                $file = new File($images['poster']['serverPath']);
+                $file->image_property = $images['poster']['webPath'];
+                $movie->setPoster($file);
+            }
+
+            if (isset($images['scene'])) {
+                $file = new File($images['scene']['serverPath']);
+                $file->image_property = $images['scene']['webPath'];
+                $movie->setScene($file);
+            }
+
+            $deleteForm = $this->createDeleteForm($movie);
+            $editForm = $this->createForm('AppBundle\Form\MovieType', $movie);
+            $editForm->handleRequest($request);
+
+            if ($editForm->isSubmitted() && $editForm->isValid()) {
+                $this->getDoctrine()->getManager()->flush();
+
+                return $this->redirectToRoute('movie_edit', array('id' => $movie->getId()));
+            }
+
+            return $this->render('movie/edit.html.twig', array(
+                'movie' => $movie,
+                'edit_form' => $editForm->createView(),
+                'delete_form' => $deleteForm->createView(),
+            ));
+        } else {
+            return $this->redirectToRoute('homepage');
         }
-
-        if(isset($images['scene'])){
-            $file = new File($images['scene']['serverPath']);
-            $file->image_property = $images['scene']['webPath'];
-            $movie->setScene($file);
-        }
-
-        $deleteForm = $this->createDeleteForm($movie);
-        $editForm = $this->createForm('AppBundle\Form\MovieType', $movie);
-        $editForm->handleRequest($request);
-
-        if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
-
-            return $this->redirectToRoute('movie_edit', array('id' => $movie->getId()));
-        }
-
-        return $this->render('movie/edit.html.twig', array(
-            'movie' => $movie,
-            'edit_form' => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
-        ));
     }
 
     /**
@@ -188,16 +215,22 @@ class MovieController extends Controller
      */
     public function deleteAction(Request $request, Movie $movie)
     {
-        $form = $this->createDeleteForm($movie);
-        $form->handleRequest($request);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($movie);
-            $em->flush();
+        if($loggedUserRole !== 'client') {
+            $form = $this->createDeleteForm($movie);
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $em = $this->getDoctrine()->getManager();
+                $em->remove($movie);
+                $em->flush();
+            }
+
+            return $this->redirectToRoute('movie_index');
+        } else {
+            return $this->redirectToRoute('homepage');
         }
-
-        return $this->redirectToRoute('movie_index');
     }
 
     /**

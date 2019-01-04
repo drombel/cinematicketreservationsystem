@@ -6,24 +6,42 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarResponsive">
+                {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                    <a style="color: #ff5860" class="nav-link">Witaj {{ app.user.name }}</a>
+                {% endif %}
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item px-xs-2 px-sm-2 active"><a href="#" class="nav-link">homepage</a></li>
                     <li class="nav-item px-xs-2 px-sm-2"><a href="{{ path('cinema_all_index') }}" class="nav-link">Lista kin</a></li>
-            {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-                        <li class="nav-item px-xs-2 px-sm-2"><a href="{{ path('user_edit', { 'id': app.user.id }) }}" class="nav-link">Ustawienia</a></li>
-                {% if app.user.role == 'admin' or app.user.role == 'moderator' %}
-                            <li class="nav-item px-xs-2 px-sm-2"><a href="{{ path('user_index') }}" class="nav-link">Użytkownicy</a></li>
-                {% endif %}
-            {% else %}
+                    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                        <div class="dropdown">
+                            <li class="nav-item px-xs-2 px-sm-2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><a href="#" class="nav-link">Ustawienia</a></li>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" href="{{ path('user_edit', { 'id': app.user.id }) }}">Zmień hasło/email</a>
+                                {% if app.user.role == 'admin' or app.user.role == 'moderator' %}
+                                    <a class="dropdown-item" href="{{ path('user_index') }}">Lista użytkowników</a></li>
+                                    <a class="dropdown-item" href="{{ path('cinema_index') }}">Lista kin</a></li>
+                                    <a class="dropdown-item" href="{{ path('cinema_new') }}">Dodaj kino</a></li>
+                                {% endif %}
+                                {% if app.user.role != 'client' %}
+                                    <a class="dropdown-item" href="{{ path('movie_index') }}">Lista filmów</a></li>
+                                    <a class="dropdown-item" href="{{ path('movie_new') }}">Dodaj film</a></li>
+                                {% endif %}
+                                {% if app.user.role == 'admin' %}
+                                    <a class="dropdown-item" href="{{ path('city_index') }}">Lista miast</a></li>
+                                    <a class="dropdown-item" href="{{ path('city_new') }}">Dodaj miasto</a></li>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% else %}
                         <li class="nav-item px-xs-2 px-sm-2 d-block d-md-none d-lg-none d-xl-none"><a href="{{ path('login') }}" class="nav-link">Logowanie</a></li>
                         <li class="nav-item px-xs-2 px-sm-2"><a href="{{ path('user_new') }}" class="nav-link">Rejestracja</a></li>
-            {% endif %}
+                    {% endif %}
                 </ul>
             </div>
             {% if is_granted('IS_AUTHENTICATED_FULLY') %}
                 <a href="{{ logout_path() }}" class="btn btn-login d-none d-md-flex">Wyloguj</a>
             {% else %}
-                <a href="{{ path('login') }}" class="btn btn-login d-none d-md-flex">Loguj</a>
+                <a href="{{ path('login') }}" class="btn btn-login d-none d-md-flex">Zaloguj</a>
             {% endif %}
         </div>
     </nav>

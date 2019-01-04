@@ -258,7 +258,8 @@ class UserController extends Controller
             $editForm->handleRequest($request);
 
             if ($editForm->isSubmitted() && $editForm->isValid()) {
-                $passwordHash = password_hash($editForm->getData()['newPassword'],PASSWORD_BCRYPT);
+
+                $passwordHash = password_hash($editForm->getData()->getPassword(),PASSWORD_BCRYPT);
                 $user->setPassword($passwordHash);
                 $this->getDoctrine()->getManager()->flush();
 
@@ -333,7 +334,54 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * Remind password
+     *
+     * @Route("/remindPassword", name="remind_password")
+     */
+    public function remindPassword(Request $request, \Swift_Mailer $mailer)
+    {
 
+        $form = $this->createForm('AppBundle\Form\RemindPasswordType');
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $email = $form->getData()['email'];
+
+            if (!$this->isEmailInUse($email)) {
+                $em = $this->getDoctrine()->getManager();
+                $user = $em->getRepository('AppBundle:User')->findOneBy(array('email' => $email));
+                $newPassword = $this->generatePassword();
+                $passwordHash = password_hash($newPassword, PASSWORD_BCRYPT);
+                $this->updatePassword($user->getId(), $passwordHash);
+
+                $message = (new \Swift_Message('New password'))
+                    ->setFrom('ticketmaniac2018@gmail.com')
+                    ->setTo($user->getEmail())
+                    ->setBody(
+                        $this->renderView(
+                            'Emails/password.html.twig', array(
+                                'name' => $user->getName(),
+                                'password' => $newPassword,
+                            )
+                        ),
+                        'text/html'
+                    );
+
+                $mailer->send($message);
+
+                return $this->redirectToRoute('homepage');
+            }
+        }
+        return $this->render('remind_password/remind_password.html.twig', array(
+            'form' => $form->createView(),
+        ));
+    }
+
+    /**
+     * @param $email
+     * @return bool
+     */
     public function isEmailInUse($email)
     {
         $repository = $this->getDoctrine()->getRepository(User::class);
@@ -345,6 +393,10 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * @param $email
+     * @return bool
+     */
     public function isEmailCorrect($email)
     {
         if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -354,6 +406,10 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * @param $password
+     * @return bool
+     */
     public function isOldPasswordCorrect($password)
     {
         $loggedUserPassword = $this->get('security.token_storage')->getToken()->getUser()->getPassword();
@@ -364,6 +420,10 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * @param $token
+     * @return bool
+     */
     public function activationTokenCorrect($token)
     {
         $repository = $this->getDoctrine()->getRepository(User::class);
@@ -376,6 +436,10 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * @param $token
+     * @return mixed
+     */
     public function changeEmailActivateTrue($token)
     {
         $repository = $this->getDoctrine()->getRepository(User::class);
@@ -385,6 +449,10 @@ class UserController extends Controller
         return $user->getEmail();
     }
 
+    /**
+     * @param $token
+     * @return mixed
+     */
     public function changeEmailActivateFalse($token)
     {
         $repository = $this->getDoctrine()->getRepository(User::class);
@@ -392,5 +460,26 @@ class UserController extends Controller
         $user->setEmailActivate(1);
         $this->getDoctrine()->getManager()->flush();
         return $user->getEmail();
+    }
+
+    /**
+     * @return bool|string
+     */
+    public function generatePassword()
+    {
+        $rand = substr(md5(microtime()),rand(0,26),8);
+        return $rand;
+    }
+
+    /**
+     * @param $id
+     * @param $password
+     */
+    public function updatePassword($id, $password)
+    {
+        $repository = $this->getDoctrine()->getRepository(User::class);
+        $user = $repository->findOneBy(array('id' => $id));
+        $user->setPassword($password);
+        $this->getDoctrine()->getManager()->flush();
     }
 }

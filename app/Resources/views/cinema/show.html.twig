@@ -1,14 +1,10 @@
 {% extends 'base_panel.html.twig' %}
 
 {% block body %}
-    <h1>Cinema</h1>
+    <h1>Kino</h1>
 
     <table>
         <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ cinema.id }}</td>
-            </tr>
             <tr>
                 <th>Name</th>
                 <td>{{ cinema.name }}</td>
@@ -28,17 +24,10 @@
         </tbody>
     </table>
 
-    <ul>
-        <li>
-            <a href="{{ path('cinema_index') }}">Back to the list</a>
-        </li>
-        <li>
-            <a href="{{ path('cinema_edit', { 'id': cinema.id }) }}">Edit</a>
-        </li>
-        <li>
-            {{ form_start(delete_form) }}
-                <input type="submit" value="Delete">
-            {{ form_end(delete_form) }}
-        </li>
-    </ul>
+    <a class="btn btn-light" href="{{ path('cinema_index') }}">Powrót do listy</a>
+    <a class="btn btn-success" href="{{ path('cinema_edit', { 'id': cinema.id }) }}">Edytuj</a>
+
+    {{ form_start(delete_form) }}
+        <br><input class="btn btn-danger" type="submit" value="Usuń">
+    {{ form_end(delete_form) }}
 {% endblock %}
