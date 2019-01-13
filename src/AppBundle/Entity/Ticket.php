@@ -39,8 +39,8 @@ class Ticket
     /**
      * @var int
      *
-     * @ORM\ManyToOne(targetEntity="user")
-     * @ORM\JoinColumn(name="userId", nullable = false)
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(name="userId", nullable = true)
      */
     private $userId;
 

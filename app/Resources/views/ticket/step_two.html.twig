@@ -1,0 +1,41 @@
+{% if seatsSorted is empty %}
+    <h3>Brak miejsc na ten seans</h3>
+{% else %}
+    <h1 class="text-center">EKRAN</h1>
+    <div id="seats">
+
+        <div class="d-flex justify-content-between align-content-center seatRow">
+            <div class="w-100 seat seatHeader">
+            </div>
+            {% for seatKey, seat in seatsSorted[1] %}
+            <div class="w-100 seat seatHeader">
+            {{ seat.col }}
+            </div>
+            {% endfor %}
+        </div>
+    {% for rowKey, row in seatsSorted %}
+        <div class="d-flex justify-content-between align-content-center seatRow">
+
+
+        {% for seatKey, seat in row %}
+            {% if seatKey == 1 %}
+            <div class="w-100 seat seatHeader">
+                {{ seat.row }}
+            </div>
+            {% endif %}
+            <div class="w-100 seat">
+                <input id="seat-{{ seat.id }}" type="checkbox" value="{{ seat.id }}" name="seatId" class="seatInput" {{ seat.taken is defined ? 'disabled':'' }}>
+                <label for="seat-{{ seat.id }}">
+                    <img src="{{ asset('images/seat.png') }}" alt="rząd {{ seat.row }} miejsce {{ seat.col }}">
+                </label>
+            </div>
+        {% endfor %}
+        </div>
+    {% endfor %}
+    </div>
+    <div class="emailField">
+        <div>Wpisz swoj email w celu wyslania biletu</div>
+        <input type="email" name="email" id="email" value="">
+    </div>
+    <button id="orderTicketStep3" class="btn btn-dark text-uppercase d-block">zamów bilet</button>
+{% endif %}

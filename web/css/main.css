@@ -228,3 +228,15 @@ header .navbar-brand{
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
+
+.seat{
+    box-sizing: border-box;
+    border: 2px #000;
+}
+.seat input{display: none;}
+.seat input:not(:checked):not(:disabled) + label{cursor: pointer;}
+.seat input:checked + label, .seat input.checked + label{background: #1e7e34;}
+.seat input:disabled + label, .seat input.taken + label{background: #C82829;}
+.seat img{max-width: 100%;box-sizing: border-box;padding: 8px;}
+.seat label{margin: 0px;}
+.seatHeader{text-align: center;background: #000;display: flex;align-items: center;justify-content: center;box-sizing: border-box;margin-right: 1px;height: 70px;margin-bottom: 1px;}

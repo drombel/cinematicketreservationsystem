@@ -15,8 +15,16 @@ class Cinema_hall_has_Movie
     /**
      * @var int
      *
-     * @ORM\Column(name="movieId", type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    private $id;
+
+    /**
+     * @var int
+     *
+     * @ORM\Column(name="movieId", type="integer")
      * @ORM\ManyToOne(targetEntity="Movie")
      */
     private $movieId;
@@ -26,7 +34,6 @@ class Cinema_hall_has_Movie
      *
      * @ORM\Column(name="cinema_hallId", type="integer")
      * @ORM\ManyToOne(targetEntity="Cinema_hall")
-     * @ORM\Id
      */
     private $cinemaHallId;
 
@@ -45,12 +52,39 @@ class Cinema_hall_has_Movie
     private $timeEnd;
 
     /**
+     * @var \Time
+     *
+     * @ORM\Column(name="time_movie_start", type="time")
+     */
+    private $timeMovieStart;
+
+
+
+    /**
+     * @var \Time
+     *
+     * @ORM\Column(name="time_movie_end", type="time")
+     */
+    private $timeMovieEnd;
+
+    /**
+     * Get id
+     *
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
      * Set movieId
      *
      * @param integer $movieId
      *
      * @return Cinema_hall_has_Movie
      */
+
     public function setMovieId($movieId)
     {
         $this->movieId = $movieId;
@@ -138,6 +172,39 @@ class Cinema_hall_has_Movie
     public function getTimeEnd()
     {
         return $this->timeEnd;
+    }
+
+
+    /**
+     * @return \Time
+     */
+    public function getTimeMovieEnd()
+    {
+        return $this->timeMovieEnd;
+    }
+
+    /**
+     * @param \Time $timeMovieEnd
+     */
+    public function setTimeMovieEnd($timeMovieEnd)
+    {
+        $this->timeMovieEnd = $timeMovieEnd;
+    }
+
+    /**
+     * @return \Time
+     */
+    public function getTimeMovieStart()
+    {
+        return $this->timeMovieStart;
+    }
+
+    /**
+     * @param \Time $timeMovieStart
+     */
+    public function setTimeMovieStart($timeMovieStart)
+    {
+        $this->timeMovieStart = $timeMovieStart;
     }
 }
 

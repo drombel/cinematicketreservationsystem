@@ -70,24 +70,26 @@ class MovieController extends Controller
     /**
      * movie for user
      *
-     * @Route("/movie_by_cinema/{movie_id}/{cinema_id}", name="movie_by_cinema")
+     * @Route("/movie_by_cinema/{movie_id}", name="movie_by_cinema") // {cinema_id}
      * @Method("GET")
      */
     public function movieByCinemaAction(Request $request)
     {
-        $movieId = $request->attributes->get('movie_id');
-        $cinemaId = $request->attributes->get('cinema_id');
+        $movieId = $request->attributes->getInt('movie_id');
+        $cinemaId = $request->query->getInt('cinema_id');
 
         $em = $this->getDoctrine()->getManager();
         $movie = $em->find(Movie::class, ['id'=>$movieId]);
-        $cinema = $em->find(Cinema::class, $cinemaId);
+        $cinemaRepo = $this->getDoctrine()->getRepository(Cinema::class);
+        $cinemas = $cinemaRepo->findAll();
 
         $movie = $this->setImages($movie)[0];
         $moviePriceDisc = $movie->getPrice()*0.8;
 
         return $this->render('movie/index_movie_by_cinema.html.twig', array(
             'movie' => $movie,
-            'cinema' => $cinema,
+            'cinemas' => $cinemas,
+            'cinema_id' => $cinemaId,
             'moviePriceDisc' => $moviePriceDisc
         ));
     }

@@ -10,17 +10,122 @@
                     <img src="/{{ movie.poster }}" alt="{{ movie.title }}" class="img-fluid w-100">
                 </div>
                 <div class="col-12 col-xs-12 col-sm-8 pt-sm-0 pt-2 movie-main-description rounded">
+                    <input id="movieId" type="hidden" value="{{ movie.id }}">
                     <h1 class="font-weight-bold">{{ movie.title }}</h1>
                     <p>{{ movie.description }}</p>
-                    <h5>Cena: {{ movie.price }}, ulgowy: {{ moviePriceDisc }}</h5>
-                    <p>{{ cinema.name }}</p>
-                    <button class="btn btn-dark text-uppercase">zamów bilet</button>
-                    #kolejna czesc to zrobic te siedzenia itd
+                    <h5>Cena: {{ movie.price }} zł, ulgowy: {{ moviePriceDisc }} zł</h5>
+                        <div class="pb-3 pt-2">
+                            <select name="cinemaId" id="cinemaId">
+                                <option value="" disabled="disabled" {%  if cinema is not defined %}selected{% endif %}>Wybierz kino</option>
+                                {% for cinema in cinemas %}
+                                    <option value="{{ cinema.id }}" {{ cinema.id == cinema_id ? 'selected':'' }}>{{ cinema.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button id="orderTicketStep1" class="btn btn-dark text-uppercase d-block">zamów bilet</button>
                 </div>
-            </div>
-            <div>
-                #w tym kinie tez grajo
             </div>
         </div>
     </div>
+{% endblock %}
+
+
+{% block javascripts %}
+    <script>
+        $(document).ready(function(){
+            $('body').on('click','#orderTicketStep1',function () {
+                var ticketData = getData();
+                if(ticketData.movieId > 0 && ticketData.cinemaId > 0){
+                    $.ajax({
+                        method: "POST",
+                        url: "{{ path('ticket_step_1') }}",
+                        data: ticketData,
+                        complete: function (response) {
+                            $('.movie-main-description').append(response.responseText);
+                            $('#cinemaId').attr('disabled','');
+                            $('#orderTicketStep1').remove();
+                        }
+                    });
+                }else{
+                    alert('brak danych'); // zmienic na jakis czerwony napis nad danymi polami
+                }
+            });
+
+            $('body').on('click','#orderTicketStep2',function () {
+                var ticketData = getData();
+                if(
+                    ticketData.movieId > 0 &&
+                    ticketData.cinemaId > 0 &&
+                    ticketData.cinemaHallHasMovieId > 0
+                ){
+                    $.ajax({
+                        method: "POST",
+                        url: "{{ path('ticket_step_2') }}",
+                        data: ticketData,
+                        complete: function (response) {
+                            $('.movie-main-description').append(response.responseText);
+                            $('#cinemaHallHasMovieId').attr('disabled','');
+                            $('#orderTicketStep2').remove();
+                        }
+                    });
+                }else{
+                    alert('brak danych'); // zmienic na jakis czerwony napis nad danymi polami
+                }
+            });
+
+            $('body').on('click','#orderTicketStep3',function () {
+                var ticketData = getData();
+                if(
+                    ticketData.movieId > 0 &&
+                    ticketData.cinemaId > 0 &&
+                    ticketData.cinemaHallHasMovieId > 0 &&
+                    ticketData.seats.length > 0,
+                        validateEmail(ticketData.email)
+                ){
+                    $.ajax({
+                        method: "POST",
+                        url: "{{ path('ticket_step_3') }}",
+                        data: ticketData,
+                        complete: function (response) {
+                            $('.movie-main-description').append(response.responseText);
+                            $('[name="seatId"]').click(function() { return false; });
+                            $('#email').attr('disabled','');
+                            $('#orderTicketStep3').remove();
+                        }
+                    });
+                }else{
+                    alert('brak danych'); // zmienic na jakis czerwony napis nad danymi polami
+                }
+            });
+
+            //movie-main-description appenda do tego zrobic
+
+            function getData() {
+                var cinemaId = parseInt($('#cinemaId').val()),
+                    movieId =  parseInt($('#movieId').val()),
+                    cinemaHallHasMovieId =  parseInt($('#cinemaHallHasMovieId').val()),
+                    seats = [], seatId = 0,
+                    email =  $('#email').val()
+                ;
+
+                $('[name="seatId"]:checked').each(function(index) {
+                    seatId = parseInt($(this).val());
+                    if(seatId > 0) seats.push( seatId );
+                });
+
+                return {
+                    movieId: movieId,
+                    cinemaId: cinemaId,
+                    cinemaHallHasMovieId: cinemaHallHasMovieId,
+                    seats: seats,
+                    email: email
+                };
+            }
+
+        function validateEmail(email) {
+            var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
+        });
+    </script>
 {% endblock %}
