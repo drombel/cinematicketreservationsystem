@@ -89,7 +89,9 @@
                         complete: function (response) {
                             $('.movie-main-description').append(response.responseText);
                             $('[name="seatId"]').click(function() { return false; });
+                            $('#name').attr('disabled','');
                             $('#email').attr('disabled','');
+                            $('#surname').attr('disabled','');
                             $('#orderTicketStep3').remove();
                         }
                     });
@@ -105,6 +107,8 @@
                     movieId =  parseInt($('#movieId').val()),
                     cinemaHallHasMovieId =  parseInt($('#cinemaHallHasMovieId').val()),
                     seats = [], seatId = 0,
+                    name = $('#name').val(),
+                    surname = $('#surname').val(),
                     email =  $('#email').val()
                 ;
 
@@ -118,6 +122,8 @@
                     cinemaId: cinemaId,
                     cinemaHallHasMovieId: cinemaHallHasMovieId,
                     seats: seats,
+                    name: name,
+                    surname: surname,
                     email: email
                 };
             }
