@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Cinema_hall_has_movies list</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Movieid</th>
+                <th>Cinemahallid</th>
+                <th>Timestart</th>
+                <th>Timeend</th>
+                <th>Timemoviestart</th>
+                <th>Timemovieend</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for cinema_hall_has_Movie in cinema_hall_has_Movies %}
+            <tr>
+                <td><a href="{{ path('cinema_hall_has_movie_show', { 'id': cinema_hall_has_Movie.id }) }}">{{ cinema_hall_has_Movie.id }}</a></td>
+                <td>{{ cinema_hall_has_Movie.movieId }}</td>
+                <td>{{ cinema_hall_has_Movie.cinemaHallId }}</td>
+                <td>{% if cinema_hall_has_Movie.timeStart %}{{ cinema_hall_has_Movie.timeStart|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>{% if cinema_hall_has_Movie.timeEnd %}{{ cinema_hall_has_Movie.timeEnd|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>{% if cinema_hall_has_Movie.timeMovieStart %}{{ cinema_hall_has_Movie.timeMovieStart|date('H:i:s') }}{% endif %}</td>
+                <td>{% if cinema_hall_has_Movie.timeMovieEnd %}{{ cinema_hall_has_Movie.timeMovieEnd|date('H:i:s') }}{% endif %}</td>
+                <td>
+                    <ul>
+                        <li>
+                            <a href="{{ path('cinema_hall_has_movie_show', { 'id': cinema_hall_has_Movie.id }) }}">show</a>
+                        </li>
+                        <li>
+                            <a href="{{ path('cinema_hall_has_movie_edit', { 'id': cinema_hall_has_Movie.id }) }}">edit</a>
+                        </li>
+                    </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('cinema_hall_has_movie_new') }}">Create a new cinema_hall_has_Movie</a>
+        </li>
+    </ul>
+{% endblock %}

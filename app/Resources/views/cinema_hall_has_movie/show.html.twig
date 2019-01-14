@@ -1,0 +1,52 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Cinema_hall_has_movie</h1>
+
+    <table>
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ cinema_hall_has_Movie.id }}</td>
+            </tr>
+            <tr>
+                <th>Movieid</th>
+                <td>{{ cinema_hall_has_Movie.movieId }}</td>
+            </tr>
+            <tr>
+                <th>Cinemahallid</th>
+                <td>{{ cinema_hall_has_Movie.cinemaHallId }}</td>
+            </tr>
+            <tr>
+                <th>Timestart</th>
+                <td>{% if cinema_hall_has_Movie.timeStart %}{{ cinema_hall_has_Movie.timeStart|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Timeend</th>
+                <td>{% if cinema_hall_has_Movie.timeEnd %}{{ cinema_hall_has_Movie.timeEnd|date('Y-m-d H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Timemoviestart</th>
+                <td>{% if cinema_hall_has_Movie.timeMovieStart %}{{ cinema_hall_has_Movie.timeMovieStart|date('H:i:s') }}{% endif %}</td>
+            </tr>
+            <tr>
+                <th>Timemovieend</th>
+                <td>{% if cinema_hall_has_Movie.timeMovieEnd %}{{ cinema_hall_has_Movie.timeMovieEnd|date('H:i:s') }}{% endif %}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <ul>
+        <li>
+            <a href="{{ path('cinema_hall_has_movie_index') }}">Back to the list</a>
+        </li>
+        <li>
+            <a href="{{ path('cinema_hall_has_movie_edit', { 'id': cinema_hall_has_Movie.id }) }}">Edit</a>
+        </li>
+        <li>
+            {{ form_start(delete_form) }}
+                <input type="submit" value="Delete">
+            {{ form_end(delete_form) }}
+        </li>
+    </ul>
+{% endblock %}

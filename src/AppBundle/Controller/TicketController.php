@@ -284,7 +284,7 @@ class TicketController extends Controller
     private function getSeatsTaken($cinemaHallHasMovieId){
         $em = $this->getDoctrine()->getManager();
         $repoTicket = $em->getRepository('AppBundle:Ticket');
-        $tickets = $repoTicket->findBy(['cinemaHallHasMovieId'=>$cinemaHallHasMovieId]);
+        $tickets = $repoTicket->findBy(['cinemaHallHasMovieId'=>$cinemaHallHasMovieId,'status'=>'pending']);
         $seatsTaken = [];
         foreach ($tickets as $ticket){
             foreach($ticket->getSeatId() as $seatId)
