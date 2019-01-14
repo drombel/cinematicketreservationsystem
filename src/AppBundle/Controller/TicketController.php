@@ -4,11 +4,13 @@ namespace AppBundle\Controller;
 
 use AppBundle\Entity\Ticket;
 use AppBundle\Entity\Cinema_hall_has_Movie;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
+use Symfony\Component\Validator\Constraints\Time;
 
 /**
  * Ticket controller.
@@ -17,6 +19,18 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
  */
 class TicketController extends Controller
 {
+    /**
+     * Ticket reservation
+     *
+     * @Route("/reservation", name="reservation")
+     */
+    public function reservationAction(Request $request)
+    {
+        $id = $request->query->get('num');
+        $this->changeTicketStatus($id);
+        return $this->redirectToRoute('homepage');
+    }
+
     /**
      * Lists all ticket entities.
      *
@@ -94,6 +108,11 @@ class TicketController extends Controller
             echo "Błędne dane";
         }
 
+        $securityContext = $this->container->get('security.authorization_checker');
+        $data['isLogged'] = false;
+
+        if ($securityContext->isGranted('IS_AUTHENTICATED_FULLY')) $data['isLogged'] = true;
+
         return $this->render('ticket/step_two.html.twig', $data);
     }
 
@@ -103,7 +122,7 @@ class TicketController extends Controller
      * @Route("/step-3", name="ticket_step_3")
      * @Method({"POST"})
      */
-    public function stepThreeAction(Request $request)
+    public function stepThreeAction(Request $request, \Swift_Mailer $mailer)
     {
 
         $cinemaId = $request->request->getInt("cinemaId");
@@ -111,6 +130,8 @@ class TicketController extends Controller
         $cinemaHallHasMovieId = $request->request->getInt("cinemaHallHasMovieId");
         $seatIds = $request->request->get("seats");
         $email = $request->request->get("email");
+        $name = $request->request->get("name");
+        $surname = $request->request->get("surname");
 
         $amountOfSeats = count($seatIds);
         $seatIds = is_array($seatIds)?$seatIds:[$seatIds];
@@ -146,7 +167,13 @@ class TicketController extends Controller
             $ticket->setCinemaHallHasMovieId($cinemaHallHasMovieId);
             $ticket->setEmail($email);
             $ticket->setSeatId($seatIds);
+            if($name == '' && $surname == '') {
+                $userId = $this->get('security.token_storage')->getToken()->getUser();
+                $ticket->setUserId($userId);
+            }
             $ticket->setStatus('Pending');
+
+            $this->sendEmail($email, $cinemaId, $movieId, $seatIds,$cinemaHallHasMovieId, $name, $surname, $ticket->getId(), $mailer);
 
             if($flag == true){
                 $em->persist($ticket);
@@ -154,6 +181,7 @@ class TicketController extends Controller
             }
 
             $data['flag'] = $flag;
+
         }else{
             echo "Błędne dane";
             exit();
@@ -298,5 +326,82 @@ class TicketController extends Controller
         $repoSeat = $em->getRepository('AppBundle:Seat');
         $seats = $repoSeat->findBy(['cinema_hallId'=>$cinemaHallId]);
         return $seats;
+    }
+
+    private function sendEmail($email, $cinemaId, $movieId, $seatIds, $cinemaHallHasMovieId, $name, $surname, $ticket, \Swift_Mailer $mailer)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $cinema = $em->getRepository('AppBundle:Cinema')->find($cinemaId);
+        $movie = $em->getRepository('AppBundle:Movie')->find($movieId);
+        $chm = $em->getRepository('AppBundle:Cinema_hall_has_Movie')->find($cinemaHallHasMovieId);
+        $user = $em->getRepository('AppBundle:User')->findOneBy(array('email' => $email));
+        $cinemaHall = $chm->getCinemaHallId();
+        $cinemaHallNumber = $em->getRepository('AppBundle:Cinema_hall')->find($cinemaHall);
+
+        $seats = [];
+
+        foreach ($seatIds as $seatId) {
+            $seatId += 10;
+            $seats[] = (string)$seatId;
+        }
+        $numberOfSeats = count($seats);
+
+        $time = date('H:i:s');
+        $time = strtotime($time) + 1800;
+        $time = date('H:i:s', $time);
+
+        if($name == '' && $surname == ''){
+            $message = (new \Swift_Message('Rezerwacja biletu - TicketManiac'))
+                ->setFrom('ticketmaniac2018@gmail.com')
+                ->setTo($email)
+                ->setBody(
+                    $this->renderView(
+                        'Emails/ticket.html.twig', array(
+                            'name' => $user->getName(),
+                            'surname' => $user->getSurname(),
+                            'cinema' => $cinema,
+                            'movie' => $movie,
+                            'chm' => $chm->getTimeMovieStart()->format('H:i:s'),
+                            'cinemaHall' => $cinemaHallNumber,
+                            'seats' => $seats,
+                            'numberOfSeats' => $numberOfSeats,
+                            'time' => $time,
+                            'ticket' => $ticket
+                        )
+                    ),
+                    'text/html'
+                );
+        } else {
+            $message = (new \Swift_Message('Rezerwacja biletu - TicketManiac'))
+                ->setFrom('ticketmaniac2018@gmail.com')
+                ->setTo($email)
+                ->setBody(
+                    $this->renderView(
+                        'Emails/ticket.html.twig', array(
+                            'name' => $name,
+                            'surname' => $surname,
+                            'cinema' => $cinema,
+                            'movie' => $movie,
+                            'chm' => $chm->getTimeMovieStart()->format('H:i:s'),
+                            'cinemaHall' => $cinemaHallNumber,
+                            'seats' => $seats,
+                            'numberOfSeats' => $numberOfSeats,
+                            'time' => $time,
+                            'ticket' => $ticket
+                        )
+                    ),
+                    'text/html'
+                );
+        }
+
+        $mailer->send($message);
+    }
+
+    public function changeTicketStatus($id)
+    {
+        $repository = $this->getDoctrine()->getRepository(Ticket::class);
+        $ticket = $repository->findOneBy(array('id' => $id));
+        $ticket->setStatus('Ok');
+        $this->getDoctrine()->getManager()->flush();
     }
 }

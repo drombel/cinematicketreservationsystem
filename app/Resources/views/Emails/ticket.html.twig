@@ -1,0 +1,26 @@
+<h3>FORMULARZ REZERWACJI</h3>
+
+<p><i>UWAGA: Miejsca zostały obecnie zablokowane na potrzeby rezerwacji.
+    W przypadku nieukończenia rezerwacji w czasie podanym poniżej,
+    miejsca zostaną automatycznie odblokowane, a rezerwacja będzie musiała zostać
+    rozpoczęta ponownie.
+    Pozostały czas blokady wybranych przez Państwa miejsc:</i> {{ time }}</p><br><br>
+
+Nabywca: {{ name }} {{ surname }}<br>
+Sprzedawca: {{ cinema.name }} {{ cinema.street }} {{ cinema.streetNumber }} {{ cinema.zipcode }}<br>
+Tytuł filmu: {{ movie.title }}<br>
+Data seansu: {{ chm }}<br><br><br>
+Sala: {{ cinemaHall.number }}<br>
+
+{% for seat in seats %}
+    Miejsce: {{ seat|first }}, rząd: {{ seat|last }}<br>
+{% endfor %}
+
+<br><br>Ilość miejsc: {{ numberOfSeats }}<br>
+Cena: {{ movie.price }}<br><br>
+
+Razem: {{ (movie.price)*(numberOfSeats) }} zł. <br><br>
+
+<i>Jeżeli, po kliknięciu, zostaniesz przeniesiony na stronę główną, to znaczy, że rezerwacja przebiegła pomyślnie.</i><br>
+<a href="http://localhost:8080/cinematicketreservationsystem/web/app_dev.php/ticket/reservation?num={{ ticket }}">Potwierdź rezerwację</a>
+
