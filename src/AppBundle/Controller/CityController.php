@@ -23,9 +23,10 @@ class CityController extends Controller
      */
     public function indexAction()
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($loggedUserRole === 'admin') {
+        if($hasAccess) {
             $em = $this->getDoctrine()->getManager();
 
             $cities = $em->getRepository('AppBundle:City')->findAll();
@@ -46,9 +47,10 @@ class CityController extends Controller
      */
     public function newAction(Request $request)
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($loggedUserRole === 'admin') {
+        if($hasAccess) {
             $city = new City();
             $form = $this->createForm('AppBundle\Form\CityType', $city);
             $form->handleRequest($request);
@@ -78,9 +80,10 @@ class CityController extends Controller
      */
     public function showAction(City $city)
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($loggedUserRole === 'admin') {
+        if($hasAccess) {
             $deleteForm = $this->createDeleteForm($city);
 
             return $this->render('city/show.html.twig', array(
@@ -100,9 +103,10 @@ class CityController extends Controller
      */
     public function editAction(Request $request, City $city)
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($loggedUserRole === 'admin') {
+        if($hasAccess) {
             $deleteForm = $this->createDeleteForm($city);
             $editForm = $this->createForm('AppBundle\Form\CityType', $city);
             $editForm->handleRequest($request);
@@ -131,9 +135,10 @@ class CityController extends Controller
      */
     public function deleteAction(Request $request, City $city)
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($loggedUserRole === 'admin') {
+        if($hasAccess) {
             $form = $this->createDeleteForm($city);
             $form->handleRequest($request);
 
@@ -163,6 +168,19 @@ class CityController extends Controller
             ->setMethod('DELETE')
             ->getForm()
         ;
+    }
+
+    private function hasAccess($loggedUserRole)
+    {
+        if($loggedUserRole !== 'anon.') {
+            if($loggedUserRole->getRole() === 'admin') {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
 }

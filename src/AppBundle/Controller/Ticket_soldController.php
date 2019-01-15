@@ -22,13 +22,20 @@ class Ticket_soldController extends Controller
      */
     public function indexAction()
     {
-        $em = $this->getDoctrine()->getManager();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        $ticket_solds = $em->getRepository('AppBundle:Ticket_sold')->findAll();
+        if($hasAccess) {
+            $em = $this->getDoctrine()->getManager();
 
-        return $this->render('ticket_sold/index.html.twig', array(
-            'ticket_solds' => $ticket_solds,
-        ));
+            $ticket_solds = $em->getRepository('AppBundle:Ticket_sold')->findAll();
+
+            return $this->render('ticket_sold/index.html.twig', array(
+                'ticket_solds' => $ticket_solds,
+            ));
+        } else {
+            return $this->redirectToRoute('homepage');
+        }
     }
 
     /**
@@ -39,22 +46,29 @@ class Ticket_soldController extends Controller
      */
     public function newAction(Request $request)
     {
-        $ticket_sold = new Ticket_sold();
-        $form = $this->createForm('AppBundle\Form\Ticket_soldType', $ticket_sold);
-        $form->handleRequest($request);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->persist($ticket_sold);
-            $em->flush();
+        if($hasAccess) {
+            $ticket_sold = new Ticket_sold();
+            $form = $this->createForm('AppBundle\Form\Ticket_soldType', $ticket_sold);
+            $form->handleRequest($request);
 
-            return $this->redirectToRoute('ticket_sold_show', array('id' => $ticket_sold->getId()));
+            if ($form->isSubmitted() && $form->isValid()) {
+                $em = $this->getDoctrine()->getManager();
+                $em->persist($ticket_sold);
+                $em->flush();
+
+                return $this->redirectToRoute('ticket_sold_show', array('id' => $ticket_sold->getId()));
+            }
+
+            return $this->render('ticket_sold/new.html.twig', array(
+                'ticket_sold' => $ticket_sold,
+                'form' => $form->createView(),
+            ));
+        } else {
+            return $this->redirectToRoute('homepage');
         }
-
-        return $this->render('ticket_sold/new.html.twig', array(
-            'ticket_sold' => $ticket_sold,
-            'form' => $form->createView(),
-        ));
     }
 
     /**
@@ -65,12 +79,19 @@ class Ticket_soldController extends Controller
      */
     public function showAction(Ticket_sold $ticket_sold)
     {
-        $deleteForm = $this->createDeleteForm($ticket_sold);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        return $this->render('ticket_sold/show.html.twig', array(
-            'ticket_sold' => $ticket_sold,
-            'delete_form' => $deleteForm->createView(),
-        ));
+        if($hasAccess) {
+            $deleteForm = $this->createDeleteForm($ticket_sold);
+
+            return $this->render('ticket_sold/show.html.twig', array(
+                'ticket_sold' => $ticket_sold,
+                'delete_form' => $deleteForm->createView(),
+            ));
+        } else {
+            return $this->redirectToRoute('homepage');
+        }
     }
 
     /**
@@ -81,21 +102,28 @@ class Ticket_soldController extends Controller
      */
     public function editAction(Request $request, Ticket_sold $ticket_sold)
     {
-        $deleteForm = $this->createDeleteForm($ticket_sold);
-        $editForm = $this->createForm('AppBundle\Form\Ticket_soldType', $ticket_sold);
-        $editForm->handleRequest($request);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $this->getDoctrine()->getManager()->flush();
+        if($hasAccess) {
+            $deleteForm = $this->createDeleteForm($ticket_sold);
+            $editForm = $this->createForm('AppBundle\Form\Ticket_soldType', $ticket_sold);
+            $editForm->handleRequest($request);
 
-            return $this->redirectToRoute('ticket_sold_edit', array('id' => $ticket_sold->getId()));
+            if ($editForm->isSubmitted() && $editForm->isValid()) {
+                $this->getDoctrine()->getManager()->flush();
+
+                return $this->redirectToRoute('ticket_sold_edit', array('id' => $ticket_sold->getId()));
+            }
+
+            return $this->render('ticket_sold/edit.html.twig', array(
+                'ticket_sold' => $ticket_sold,
+                'edit_form' => $editForm->createView(),
+                'delete_form' => $deleteForm->createView(),
+            ));
+        } else {
+            return $this->redirectToRoute('homepage');
         }
-
-        return $this->render('ticket_sold/edit.html.twig', array(
-            'ticket_sold' => $ticket_sold,
-            'edit_form' => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
-        ));
     }
 
     /**
@@ -106,16 +134,23 @@ class Ticket_soldController extends Controller
      */
     public function deleteAction(Request $request, Ticket_sold $ticket_sold)
     {
-        $form = $this->createDeleteForm($ticket_sold);
-        $form->handleRequest($request);
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em = $this->getDoctrine()->getManager();
-            $em->remove($ticket_sold);
-            $em->flush();
+        if($hasAccess) {
+            $form = $this->createDeleteForm($ticket_sold);
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $em = $this->getDoctrine()->getManager();
+                $em->remove($ticket_sold);
+                $em->flush();
+            }
+
+            return $this->redirectToRoute('ticket_sold_index');
+        } else {
+            return $this->redirectToRoute('homepage');
         }
-
-        return $this->redirectToRoute('ticket_sold_index');
     }
 
     /**
@@ -132,5 +167,18 @@ class Ticket_soldController extends Controller
             ->setMethod('DELETE')
             ->getForm()
         ;
+    }
+
+    private function hasAccess($loggedUserRole)
+    {
+        if($loggedUserRole !== 'anon.') {
+            if($loggedUserRole->getRole() === 'admin') {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 }

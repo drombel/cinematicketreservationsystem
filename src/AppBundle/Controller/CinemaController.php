@@ -3,9 +3,11 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Cinema;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -23,16 +25,26 @@ class CinemaController extends Controller
      */
     public function indexAction()
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($loggedUserRole === 'admin' || $loggedUserRole === 'moderator') {
+        if($hasAccess) {
+            $userCityId = $this->get('security.token_storage')->getToken()->getUser()->getCity();
             $em = $this->getDoctrine()->getManager();
 
-            $cinemas = $em->getRepository('AppBundle:Cinema')->findAll();
+            if($userCityId === null) {
+                $cinemas = $em->getRepository('AppBundle:Cinema')->findAll();
 
-            return $this->render('cinema/index.html.twig', array(
-                'cinemas' => $cinemas,
-            ));
+                return $this->render('cinema/index.html.twig', array(
+                    'cinemas' => $cinemas,
+                ));
+            } else {
+                $cinemas = $em->getRepository('AppBundle:Cinema')->findBy(array('city' => $userCityId));
+
+                return $this->render('cinema/index.html.twig', array(
+                    'cinemas' => $cinemas,
+                ));
+            }
         } else {
             return $this->redirectToRoute('homepage');
         }
@@ -63,11 +75,28 @@ class CinemaController extends Controller
      */
     public function newAction(Request $request)
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($loggedUserRole === 'admin' || $loggedUserRole === 'moderator') {
+        if ($hasAccess) {
+
+            $userCityId = $this->get('security.token_storage')->getToken()->getUser()->getCity();
+
             $cinema = new Cinema();
-            $form = $this->createForm('AppBundle\Form\CinemaType', $cinema);
+            if ($userCityId === null) {
+                $form = $this->createForm('AppBundle\Form\CinemaType', $cinema);
+            } else {
+                $form = $this->createForm('AppBundle\Form\CinemaType', $cinema);
+                /*$form->remove('city');
+                $form->add('city', EntityType::class, array(
+                    'attr' => array('class' => 'form-control'),
+                    'class' => 'AppBundle:City',
+                    'data' => $userCityId,
+                    'disabled' => true
+                ));*/
+                //$form->get('city')->setData($userCityId);
+            }
+
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
@@ -95,15 +124,34 @@ class CinemaController extends Controller
      */
     public function showAction(Cinema $cinema)
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($loggedUserRole === 'admin' || $loggedUserRole === 'moderator') {
-            $deleteForm = $this->createDeleteForm($cinema);
+        if ($hasAccess) {
 
-            return $this->render('cinema/show.html.twig', array(
-                'cinema' => $cinema,
-                'delete_form' => $deleteForm->createView(),
-            ));
+            $userCityId = $this->get('security.token_storage')->getToken()->getUser()->getCity();
+
+            if ($userCityId !== null) {
+                $em = $this->getDoctrine()->getManager();
+                $cinemas = $em->getRepository('AppBundle:Cinema')->findBy(array('city' => $userCityId));
+                if (in_array($cinema, $cinemas)) {
+                    $deleteForm = $this->createDeleteForm($cinema);
+
+                    return $this->render('cinema/show.html.twig', array(
+                        'cinema' => $cinema,
+                        'delete_form' => $deleteForm->createView(),
+                    ));
+                } else {
+                    return $this->redirectToRoute('cinema_index');
+                }
+            } else {
+                $deleteForm = $this->createDeleteForm($cinema);
+
+                return $this->render('cinema/show.html.twig', array(
+                    'cinema' => $cinema,
+                    'delete_form' => $deleteForm->createView(),
+                ));
+            }
         } else {
             return $this->redirectToRoute('homepage');
         }
@@ -117,24 +165,53 @@ class CinemaController extends Controller
      */
     public function editAction(Request $request, Cinema $cinema)
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($loggedUserRole === 'admin' || $loggedUserRole === 'moderator') {
-            $deleteForm = $this->createDeleteForm($cinema);
-            $editForm = $this->createForm('AppBundle\Form\CinemaType', $cinema);
-            $editForm->handleRequest($request);
+        if($hasAccess) {
 
-            if ($editForm->isSubmitted() && $editForm->isValid()) {
-                $this->getDoctrine()->getManager()->flush();
+            $userCityId = $this->get('security.token_storage')->getToken()->getUser()->getCity();
 
-                return $this->redirectToRoute('cinema_edit', array('id' => $cinema->getId()));
+            if ($userCityId !== null) {
+                $em = $this->getDoctrine()->getManager();
+                $cinemas = $em->getRepository('AppBundle:Cinema')->findBy(array('city' => $userCityId));
+
+                if (in_array($cinema, $cinemas)) {
+                    $deleteForm = $this->createDeleteForm($cinema);
+                    $editForm = $this->createForm('AppBundle\Form\CinemaType', $cinema);
+                    $editForm->handleRequest($request);
+
+                    if ($editForm->isSubmitted() && $editForm->isValid()) {
+                        $this->getDoctrine()->getManager()->flush();
+
+                        return $this->redirectToRoute('cinema_edit', array('id' => $cinema->getId()));
+                    }
+
+                    return $this->render('cinema/edit.html.twig', array(
+                        'cinema' => $cinema,
+                        'edit_form' => $editForm->createView(),
+                        'delete_form' => $deleteForm->createView(),
+                    ));
+                } else {
+                    return $this->redirectToRoute('cinema_index');
+                }
+            } else {
+                $deleteForm = $this->createDeleteForm($cinema);
+                $editForm = $this->createForm('AppBundle\Form\CinemaType', $cinema);
+                $editForm->handleRequest($request);
+
+                if ($editForm->isSubmitted() && $editForm->isValid()) {
+                    $this->getDoctrine()->getManager()->flush();
+
+                    return $this->redirectToRoute('cinema_edit', array('id' => $cinema->getId()));
+                }
+
+                return $this->render('cinema/edit.html.twig', array(
+                    'cinema' => $cinema,
+                    'edit_form' => $editForm->createView(),
+                    'delete_form' => $deleteForm->createView(),
+                ));
             }
-
-            return $this->render('cinema/edit.html.twig', array(
-                'cinema' => $cinema,
-                'edit_form' => $editForm->createView(),
-                'delete_form' => $deleteForm->createView(),
-            ));
         } else {
             return $this->redirectToRoute('homepage');
         }
@@ -150,9 +227,10 @@ class CinemaController extends Controller
      */
     public function deleteAction(Request $request, Cinema $cinema)
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($loggedUserRole === 'admin' || $loggedUserRole === 'moderator') {
+        if($hasAccess) {
             $form = $this->createDeleteForm($cinema);
             $form->handleRequest($request);
 
@@ -184,5 +262,18 @@ class CinemaController extends Controller
             ->setMethod('DELETE')
             ->getForm()
         ;
+    }
+
+    private function hasAccess($loggedUserRole)
+    {
+        if($loggedUserRole !== 'anon.') {
+            if($loggedUserRole->getRole() === 'admin' || $loggedUserRole->getRole() === 'moderator') {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 }

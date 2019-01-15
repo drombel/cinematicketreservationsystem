@@ -1,14 +1,10 @@
-{% extends 'base.html.twig' %}
+{% extends 'base_panel.html.twig' %}
 
 {% block body %}
-    <h1>Cinema_hall_has_movie</h1>
+    <h1>Sala kinowa z filmem</h1>
 
     <table>
         <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ cinema_hall_has_Movie.id }}</td>
-            </tr>
             <tr>
                 <th>Movieid</th>
                 <td>{{ cinema_hall_has_Movie.movieId }}</td>
@@ -36,17 +32,10 @@
         </tbody>
     </table>
 
-    <ul>
-        <li>
-            <a href="{{ path('cinema_hall_has_movie_index') }}">Back to the list</a>
-        </li>
-        <li>
-            <a href="{{ path('cinema_hall_has_movie_edit', { 'id': cinema_hall_has_Movie.id }) }}">Edit</a>
-        </li>
-        <li>
-            {{ form_start(delete_form) }}
-                <input type="submit" value="Delete">
-            {{ form_end(delete_form) }}
-        </li>
-    </ul>
+    <a class="btn btn-light" href="{{ path('cinema_hall_has_movie_index') }}">Powrót do listy</a>
+    <a class="btn btn-success" href="{{ path('cinema_hall_has_movie_edit', { 'id': cinema_hall_has_Movie.id }) }}">Edytuj</a>
+
+    {{ form_start(delete_form) }}
+        <br><input class="btn btn-danger" type="submit" value="Usuń">
+    {{ form_end(delete_form) }}
 {% endblock %}

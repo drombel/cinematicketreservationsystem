@@ -29,9 +29,10 @@ class MovieController extends Controller
      */
     public function indexAction()
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($loggedUserRole !== 'client') {
+        if($hasAccess) {
 
             $em = $this->getDoctrine()->getManager();
 
@@ -102,9 +103,10 @@ class MovieController extends Controller
      */
     public function newAction(Request $request)
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($loggedUserRole !== 'client') {
+        if($hasAccess) {
             $movie = new Movie();
             $form = $this->createForm('AppBundle\Form\MovieType', $movie);
             $form->handleRequest($request);
@@ -147,9 +149,10 @@ class MovieController extends Controller
      */
     public function showAction(Movie $movie)
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($loggedUserRole !== 'client') {
+        if($hasAccess) {
             $deleteForm = $this->createDeleteForm($movie);
             //$images = $this->getImages($movie);
 
@@ -172,9 +175,10 @@ class MovieController extends Controller
      */
     public function editAction(Request $request, Movie $movie)
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($loggedUserRole !== 'client') {
+        if($hasAccess) {
             $images = $this->getImages($movie);
 
             if (isset($images['poster'])) {
@@ -217,9 +221,10 @@ class MovieController extends Controller
      */
     public function deleteAction(Request $request, Movie $movie)
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($loggedUserRole !== 'client') {
+        if($hasAccess) {
             $form = $this->createDeleteForm($movie);
             $form->handleRequest($request);
 
@@ -301,5 +306,17 @@ class MovieController extends Controller
         return $movies;
     }
 
+    private function hasAccess($loggedUserRole)
+    {
+        if($loggedUserRole !== 'anon.') {
+            if($loggedUserRole->getRole() !== 'client') {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
 
 }

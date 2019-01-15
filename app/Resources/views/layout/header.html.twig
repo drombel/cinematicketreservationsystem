@@ -10,7 +10,7 @@
                     <a style="color: #ff5860" class="nav-link">Witaj {{ app.user.name }}</a>
                 {% endif %}
                 <ul class="navbar-nav ml-auto">
-                    <li class="nav-item px-xs-2 px-sm-2 active"><a href="#" class="nav-link">homepage</a></li>
+                    <li class="nav-item px-xs-2 px-sm-2 active"><a href="{{ path('homepage') }}" class="nav-link"><i class="fas fa-home"></i></a></li>
                     <li class="nav-item px-xs-2 px-sm-2"><a href="{{ path('cinema_all_index') }}" class="nav-link">Wybierz kino</a></li>
                     {% if is_granted('IS_AUTHENTICATED_FULLY') %}
                         <div class="dropdown">
@@ -18,17 +18,18 @@
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 <a class="dropdown-item" href="{{ path('user_edit', { 'id': app.user.id }) }}">Zmień hasło/email</a>
                                 {% if app.user.role == 'admin' or app.user.role == 'moderator' %}
-                                    <a class="dropdown-item" href="{{ path('user_index') }}">Lista użytkowników</a></li>
-                                    <a class="dropdown-item" href="{{ path('cinema_index') }}">Lista kin</a></li>
-                                    <a class="dropdown-item" href="{{ path('cinema_new') }}">Dodaj kino</a></li>
+                                    <a class="dropdown-item" href="{{ path('user_index') }}">Użytkownicy</a></li>
+                                    <a class="dropdown-item" href="{{ path('cinema_index') }}">Kino</a></li>
                                 {% endif %}
                                 {% if app.user.role != 'client' %}
-                                    <a class="dropdown-item" href="{{ path('movie_index') }}">Lista filmów</a></li>
-                                    <a class="dropdown-item" href="{{ path('movie_new') }}">Dodaj film</a></li>
+                                    <a class="dropdown-item" href="{{ path('movie_index') }}">Film</a></li>
+                                    <a class="dropdown-item" href="{{ path('cinema_hall_has_movie_index') }}">Seans</a></li>
                                 {% endif %}
                                 {% if app.user.role == 'admin' %}
-                                    <a class="dropdown-item" href="{{ path('city_index') }}">Lista miast</a></li>
-                                    <a class="dropdown-item" href="{{ path('city_new') }}">Dodaj miasto</a></li>
+                                    <a class="dropdown-item" href="{{ path('city_index') }}">Miasto</a></li>
+                                    <a class="dropdown-item" href="{{ path('cinema_hall_index') }}">Sala</a></li>
+                                    <a class="dropdown-item" href="{{ path('ticket_index') }}">Bilet</a></li>
+                                    <a class="dropdown-item" href="{{ path('ticket_sold_index') }}">Bilet - ARCHIWUM</a></li>
                                 {% endif %}
                             </div>
                         </div>

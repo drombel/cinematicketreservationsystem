@@ -1,45 +1,39 @@
 {% extends 'base_panel.html.twig' %}
 
 {% block body %}
-    <h1>Tickets list</h1>
+    <h1>Lista biletów</h1>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Cinemahallhasmovieid</th>
-                <th>Seatid</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for ticket in tickets %}
-            <tr>
-                <td><a href="{{ path('ticket_show', { 'id': ticket.id }) }}">{{ ticket.id }}</a></td>
-                <td>{{ ticket.cinemaHallHasMovieId }}</td>
-                <td>{% if ticket.seatId %}{{ ticket.seatId|join(', ') }}{% endif %}</td>
-                <td>{{ ticket.email }}</td>
-                <td>{{ ticket.status }}</td>
-                <td>
-                    <ul>
-                        <li>
-                            <a href="{{ path('ticket_show', { 'id': ticket.id }) }}">show</a>
-                        </li>
-                        <li>
-                            <a href="{{ path('ticket_edit', { 'id': ticket.id }) }}">edit</a>
-                        </li>
-                    </ul>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <ul>
-        <li>
-            <a href="{{ path('ticket_new') }}">Create a new ticket</a>
-        </li>
-    </ul>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Cinemahallhasmovieid</th>
+                    <th>Seatid</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket.cinemaHallHasMovieId }}</td>
+                    <td>{% if ticket.seatId %}{{ ticket.seatId|join(', ') }}{% endif %}</td>
+                    <td>{{ ticket.email }}</td>
+                    <td>{{ ticket.status }}</td>
+                    <td>
+                        <ul>
+                            <li>
+                                <a href="{{ path('ticket_show', { 'id': ticket.id }) }}">Pokaż</a>
+                            </li>
+                            <li>
+                                <a href="{{ path('ticket_edit', { 'id': ticket.id }) }}">Edytuj</a>
+                            </li>
+                        </ul>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

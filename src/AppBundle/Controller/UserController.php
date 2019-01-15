@@ -25,29 +25,36 @@ class UserController extends Controller
      */
     public function indexAction()
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $token = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($token);
 
-        if($loggedUserRole === 'admin') {
-            $em = $this->getDoctrine()->getManager();
-            $users = $em->getRepository('AppBundle:User')->findAll();
+        if($hasAccess) {
+            $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
 
-            return $this->render('user/index.html.twig', array(
-                'users' => $users,
-                'city' => '',
-                'role' => 'admin'
-            ));
-        } elseif($loggedUserRole === 'moderator') {
-            $em = $this->getDoctrine()->getManager();
-            $city = $this->getUser()->getCity()->getId();
-            $cityName = $this->getUser()->getCity()->getName();
-            $cinemas = $em->getRepository('AppBundle:Cinema')->findBy(array('city' => $city));
-            $users = $em->getRepository('AppBundle:User')->findBy(array('cinema' => $cinemas));
+            if ($loggedUserRole === 'admin') {
+                $em = $this->getDoctrine()->getManager();
+                $users = $em->getRepository('AppBundle:User')->findAll();
 
-            return $this->render('user/index.html.twig', array(
-                'users' => $users,
-                'city' => $cityName,
-                'role' => 'moderator'
-            ));
+                return $this->render('user/index.html.twig', array(
+                    'users' => $users,
+                    'city' => '',
+                    'role' => 'admin'
+                ));
+            } elseif ($loggedUserRole === 'moderator') {
+                $em = $this->getDoctrine()->getManager();
+                $city = $this->getUser()->getCity()->getId();
+                $cityName = $this->getUser()->getCity()->getName();
+                $cinemas = $em->getRepository('AppBundle:Cinema')->findBy(array('city' => $city));
+                $users = $em->getRepository('AppBundle:User')->findBy(array('cinema' => $cinemas));
+
+                return $this->render('user/index.html.twig', array(
+                    'users' => $users,
+                    'city' => $cityName,
+                    'role' => 'moderator'
+                ));
+            } else {
+                return $this->redirectToRoute('homepage');
+            }
         } else {
             return $this->redirectToRoute('homepage');
         }
@@ -134,9 +141,10 @@ class UserController extends Controller
      */
     public function showAction(User $user)
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccessAdMod($loggedUserRole);
 
-        if($loggedUserRole === 'admin' || $loggedUserRole === 'moderator') {
+        if($hasAccess) {
             $deleteForm = $this->createDeleteForm($user);
             return $this->render('user/show.html.twig', array(
                 'user' => $user,
@@ -156,85 +164,114 @@ class UserController extends Controller
      */
     public function editAction(Request $request, User $user, \Swift_Mailer $mailer, $id)
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
-        $loggedUserId = $this->get('security.token_storage')->getToken()->getUser()->getId();
+        $token = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($token);
 
-        $deleteForm = $this->createDeleteForm($user);
+        if($hasAccess) {
+            $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+            $loggedUserId = $this->get('security.token_storage')->getToken()->getUser()->getId();
 
-        if($loggedUserRole !== 'admin' && strval($loggedUserId) === $id) {
+            $deleteForm = $this->createDeleteForm($user);
 
-            $editUserForm = $this->createForm('AppBundle\Form\UserUpdateType');
-            $editUserForm->handleRequest($request);
+            if ($loggedUserRole !== 'admin' && strval($loggedUserId) === $id) {
 
-            if ($editUserForm->isSubmitted() && $editUserForm->isValid()) {
-                if($editUserForm->getData()['email'] == "") {
-                    if($this->isOldPasswordCorrect($editUserForm->getData()['oldPassword'])) {
-                        $passwordHash = password_hash($editUserForm->getData()['newPassword'],PASSWORD_BCRYPT);
-                        $user->setPassword($passwordHash);
-                        $this->getDoctrine()->getManager()->flush();
-                        return $this->redirectToRoute('logout');
+                $editUserForm = $this->createForm('AppBundle\Form\UserUpdateType');
+                $editUserForm->handleRequest($request);
+
+                if ($editUserForm->isSubmitted() && $editUserForm->isValid()) {
+                    if ($editUserForm->getData()['email'] == "") {
+                        if ($this->isOldPasswordCorrect($editUserForm->getData()['oldPassword'])) {
+                            $passwordHash = password_hash($editUserForm->getData()['newPassword'], PASSWORD_BCRYPT);
+                            $user->setPassword($passwordHash);
+                            $this->getDoctrine()->getManager()->flush();
+                            return $this->redirectToRoute('logout');
+                        } else {
+                            return $this->redirectToRoute('user_edit', array('id' => $user->getId()));
+                        }
                     } else {
+                        if ($this->isEmailInUse($editUserForm->getData()['email']) && $this->isEmailCorrect($editUserForm->getData()['email'])) {
+                            $user->setEmail($editUserForm->getData()['email']);
+                            $activationToken = hash("sha256", $editUserForm->getData()['email']);
+                            $user->setActivationToken($activationToken);
+                            $user->setEmailActivate(0);
+                            $this->getDoctrine()->getManager()->flush();
+
+                            $message = (new \Swift_Message('Registration'))
+                                ->setFrom('ticketmaniac2018@gmail.com')
+                                ->setTo($user->getEmail())
+                                ->setBody(
+                                    $this->renderView(
+                                        'Emails/register.html.twig', array(
+                                            'name' => $user->getName(),
+                                            'activationToken' => $user->getActivationToken()
+                                        )
+                                    ),
+                                    'text/html'
+                                );
+
+                            $mailer->send($message);
+
+                            return $this->redirectToRoute('logout');
+                        }
                         return $this->redirectToRoute('user_edit', array('id' => $user->getId()));
                     }
-                } else {
-                    if($this->isEmailInUse($editUserForm->getData()['email']) && $this->isEmailCorrect($editUserForm->getData()['email'])) {
-                        $user->setEmail($editUserForm->getData()['email']);
-                        $activationToken = hash("sha256", $editUserForm->getData()['email']);
-                        $user->setActivationToken($activationToken);
-                        $user->setEmailActivate(0);
+                }
+
+                return $this->render('user/edit.html.twig', array(
+                    'loggedUserRole' => $loggedUserRole,
+                    'user' => $user,
+                    'edit_form' => $editUserForm->createView(),
+                    'delete_form' => $deleteForm->createView(),
+                ));
+
+            } elseif ($loggedUserRole === 'client' && strval($loggedUserId) !== $id) {
+
+                return $this->redirectToRoute('homepage');
+
+            } elseif ($loggedUserRole === 'moderator' && strval($loggedUserId) !== $id) {
+
+                $em = $this->getDoctrine()->getManager();
+                $city = $this->getUser()->getCity()->getId();
+                $cinemas = $em->getRepository('AppBundle:Cinema')->findBy(array('city' => $city));
+                $users = $em->getRepository('AppBundle:User')->findBy(array('cinema' => $cinemas));
+                $ids = array();
+
+                foreach ($users as $userId) {
+                    $ids[] = strval($userId->getId());
+                }
+
+                if (in_array($id, $ids)) {
+
+                    $editForm = $this->createForm('AppBundle\Form\UserUpdateModeratorType', $user);
+                    $editForm->handleRequest($request);
+
+                    if ($editForm->isSubmitted() && $editForm->isValid()) {
                         $this->getDoctrine()->getManager()->flush();
 
-                        $message = (new \Swift_Message('Registration'))
-                            ->setFrom('ticketmaniac2018@gmail.com')
-                            ->setTo($user->getEmail())
-                            ->setBody(
-                                $this->renderView(
-                                    'Emails/register.html.twig', array(
-                                        'name' => $user->getName(),
-                                        'activationToken' => $user->getActivationToken()
-                                    )
-                                ),
-                                'text/html'
-                            );
-
-                        $mailer->send($message);
-
-                        return $this->redirectToRoute('logout');
+                        return $this->redirectToRoute('user_edit', array('id' => $user->getId()));
                     }
-                    return $this->redirectToRoute('user_edit', array('id' => $user->getId()));
+
+                    return $this->render('user/edit.html.twig', array(
+                        'loggedUserRole' => $loggedUserRole,
+                        'user' => $user,
+                        'edit_form' => $editForm->createView(),
+                        'delete_form' => $deleteForm->createView(),
+                    ));
+
+                } else {
+
+                    return $this->redirectToRoute('user_index');
+
                 }
-            }
+            } else {
 
-            return $this->render('user/edit.html.twig', array(
-                'loggedUserRole' => $loggedUserRole,
-                'user' => $user,
-                'edit_form' => $editUserForm->createView(),
-                'delete_form' => $deleteForm->createView(),
-            ));
-
-        } elseif($loggedUserRole === 'client' && strval($loggedUserId) !== $id) {
-
-            return $this->redirectToRoute('homepage');
-
-        } elseif($loggedUserRole === 'moderator' && strval($loggedUserId) !== $id) {
-
-            $em = $this->getDoctrine()->getManager();
-            $city = $this->getUser()->getCity()->getId();
-            $cinemas = $em->getRepository('AppBundle:Cinema')->findBy(array('city' => $city));
-            $users = $em->getRepository('AppBundle:User')->findBy(array('cinema' => $cinemas));
-            $ids = array();
-
-            foreach($users as $userId)
-            {
-                $ids[] = strval($userId->getId());
-            }
-
-            if (in_array($id, $ids)) {
-
-                $editForm = $this->createForm('AppBundle\Form\UserUpdateModeratorType', $user);
+                $editForm = $this->createForm('AppBundle\Form\UserUpdateAdminType', $user);
                 $editForm->handleRequest($request);
 
                 if ($editForm->isSubmitted() && $editForm->isValid()) {
+
+                    $passwordHash = password_hash($editForm->getData()->getPassword(), PASSWORD_BCRYPT);
+                    $user->setPassword($passwordHash);
                     $this->getDoctrine()->getManager()->flush();
 
                     return $this->redirectToRoute('user_edit', array('id' => $user->getId()));
@@ -246,32 +283,9 @@ class UserController extends Controller
                     'edit_form' => $editForm->createView(),
                     'delete_form' => $deleteForm->createView(),
                 ));
-
-            } else {
-
-                return $this->redirectToRoute('user_index');
-
             }
-        }  else {
-
-            $editForm = $this->createForm('AppBundle\Form\UserUpdateAdminType', $user);
-            $editForm->handleRequest($request);
-
-            if ($editForm->isSubmitted() && $editForm->isValid()) {
-
-                $passwordHash = password_hash($editForm->getData()->getPassword(),PASSWORD_BCRYPT);
-                $user->setPassword($passwordHash);
-                $this->getDoctrine()->getManager()->flush();
-
-                return $this->redirectToRoute('user_edit', array('id' => $user->getId()));
-            }
-
-            return $this->render('user/edit.html.twig', array(
-                'loggedUserRole' => $loggedUserRole,
-                'user' => $user,
-                'edit_form' => $editForm->createView(),
-                'delete_form' => $deleteForm->createView(),
-            ));
+        } else {
+            return $this->redirectToRoute('homepage');
         }
     }
 
@@ -283,9 +297,10 @@ class UserController extends Controller
      */
     public function deleteAction(Request $request, User $user)
     {
-        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccessAd($loggedUserRole);
 
-        if($loggedUserRole === 'admin') {
+        if($hasAccess) {
             $form = $this->createDeleteForm($user);
             $form->handleRequest($request);
 
@@ -481,5 +496,40 @@ class UserController extends Controller
         $user = $repository->findOneBy(array('id' => $id));
         $user->setPassword($password);
         $this->getDoctrine()->getManager()->flush();
+    }
+
+    private function hasAccess($token)
+    {
+        if($token !== 'anon.') {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private function hasAccessAdMod($loggedUserRole)
+    {
+        if($loggedUserRole !== 'anon.') {
+            if($loggedUserRole->getRole() === 'admin' || $loggedUserRole->getRole() === 'moderator') {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    private function hasAccessAd($loggedUserRole)
+    {
+        if($loggedUserRole !== 'anon.') {
+            if($loggedUserRole->getRole() === 'admin') {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 }
