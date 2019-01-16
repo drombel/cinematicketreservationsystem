@@ -58,6 +58,12 @@ class Ticket
      */
     private $status;
 
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="date", type="datetime")
+     */
+    private $date;
 
     /**
      * Get id
@@ -187,6 +193,27 @@ class Ticket
     public function getStatus()
     {
         return $this->status;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getDate()
+    {
+        return $this->date;
+    }
+
+    /**
+     * @param \DateTime $date
+     */
+    public function setDate($date)
+    {
+        $this->date = $date;
+    }
+
+    public function __construct()
+    {
+        $this->date = new \DateTime();
     }
 }
 

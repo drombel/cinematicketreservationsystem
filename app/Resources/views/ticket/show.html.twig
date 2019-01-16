@@ -19,7 +19,7 @@
             </tr>
             <tr>
                 <th>UserId</th>
-                <td>{{ ticket.userId.email }}</td>
+                <td>{% if ticket.userId %}{{ ticket.userId.email }}{% endif %}</td>
             </tr>
             <tr>
                 <th>Status</th>
