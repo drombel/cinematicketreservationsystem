@@ -135,7 +135,9 @@ class Cinema_hall_has_Movie
      */
     public function setTimeStart($timeStart)
     {
-        $this->timeStart = $timeStart;
+        $date_now = date("Y-m-d");
+        if ($date_now <= $timeStart)
+            $this->timeStart = $timeStart;
 
         return $this;
     }
@@ -159,7 +161,10 @@ class Cinema_hall_has_Movie
      */
     public function setTimeEnd($timeEnd)
     {
-        $this->timeEnd = $timeEnd;
+        $date_now = date("Y-m-d");
+
+        if ($date_now <= $timeEnd && $this->timeStart < $timeEnd)
+            $this->timeEnd = $timeEnd;
 
         return $this;
     }
@@ -172,23 +177,6 @@ class Cinema_hall_has_Movie
     public function getTimeEnd()
     {
         return $this->timeEnd;
-    }
-
-
-    /**
-     * @return \Time
-     */
-    public function getTimeMovieEnd()
-    {
-        return $this->timeMovieEnd;
-    }
-
-    /**
-     * @param \Time $timeMovieEnd
-     */
-    public function setTimeMovieEnd($timeMovieEnd)
-    {
-        $this->timeMovieEnd = $timeMovieEnd;
     }
 
     /**
@@ -206,5 +194,23 @@ class Cinema_hall_has_Movie
     {
         $this->timeMovieStart = $timeMovieStart;
     }
+
+    /**
+     * @return \Time
+     */
+    public function getTimeMovieEnd()
+    {
+        return $this->timeMovieEnd;
+    }
+
+    /**
+     * @param \Time $timeMovieEnd
+     */
+    public function setTimeMovieEnd($timeMovieEnd)
+    {
+        if ($this->timeMovieStart < $timeMovieEnd)
+            $this->timeMovieEnd = $timeMovieEnd;
+    }
+
 }
 

@@ -37,6 +37,13 @@ class Ticket
     private $seatId;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="date", type="date")
+     */
+    private $date;
+
+    /**
      * @var int
      *
      * @ORM\ManyToOne(targetEntity="User")
@@ -58,12 +65,6 @@ class Ticket
      */
     private $status;
 
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="date", type="datetime")
-     */
-    private $date;
 
     /**
      * Get id

@@ -72,17 +72,25 @@ class Cinema_hall_has_MovieController extends Controller
             $cinema_hall_has_Movie = new Cinema_hall_has_movie();
             $form = $this->createForm('AppBundle\Form\Cinema_hall_has_MovieType', $cinema_hall_has_Movie);
             $form->handleRequest($request);
+            $error = "";
 
             if ($form->isSubmitted() && $form->isValid()) {
                 $em = $this->getDoctrine()->getManager();
-                $em->persist($cinema_hall_has_Movie);
-                $em->flush();
 
-                return $this->redirectToRoute('cinema_hall_has_movie_show', array('id' => $cinema_hall_has_Movie->getId()));
+                $repo = $em->getRepository(Cinema_hall_has_Movie::class);
+                $isCinemaHallFreeWithDate = $repo->isCinemaHallFreeWithDate($cinema_hall_has_Movie);
+                if ($isCinemaHallFreeWithDate){
+                    $em->persist($cinema_hall_has_Movie);
+                    $em->flush();
+                    return $this->redirectToRoute('cinema_hall_has_movie_show', array('id' => $cinema_hall_has_Movie->getId()));
+                }else{
+                    $error = "Błędne daty i godziny";
+                }
             }
 
             return $this->render('cinema_hall_has_movie/new.html.twig', array(
                 'cinema_hall_has_Movie' => $cinema_hall_has_Movie,
+                'error' => $error,
                 'form' => $form->createView(),
             ));
         } else {
@@ -195,7 +203,23 @@ class Cinema_hall_has_MovieController extends Controller
                     $deleteForm = $this->createDeleteForm($cinema_hall_has_Movie);
                     $editForm = $this->createForm('AppBundle\Form\Cinema_hall_has_MovieType', $cinema_hall_has_Movie);
                     $editForm->handleRequest($request);
+        $deleteForm = $this->createDeleteForm($cinema_hall_has_Movie);
+        $editForm = $this->createForm('AppBundle\Form\Cinema_hall_has_MovieType', $cinema_hall_has_Movie);
+        $editForm->handleRequest($request);
+        $error = "";
 
+        if ($editForm->isSubmitted() && $editForm->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $repo = $em->getRepository(Cinema_hall_has_Movie::class);
+            $isCinemaHallFreeWithDate = $repo->isCinemaHallFreeWithDate($cinema_hall_has_Movie);
+
+            if ($isCinemaHallFreeWithDate){
+                $this->getDoctrine()->getManager()->flush();
+                return $this->redirectToRoute('cinema_hall_has_movie_edit', array('id' => $cinema_hall_has_Movie->getId()));
+            }else{
+                $error = "Błędne daty i godziny";
+            }
+        }
                     if ($editForm->isSubmitted() && $editForm->isValid()) {
                         $this->getDoctrine()->getManager()->flush();
 
@@ -230,6 +254,12 @@ class Cinema_hall_has_MovieController extends Controller
         } else {
             return $this->redirectToRoute('homepage');
         }
+        return $this->render('cinema_hall_has_movie/edit.html.twig', array(
+            'cinema_hall_has_Movie' => $cinema_hall_has_Movie,
+            'edit_form' => $editForm->createView(),
+            'delete_form' => $deleteForm->createView(),
+            'error' => $error,
+        ));
     }
 
     /**
@@ -276,4 +306,5 @@ class Cinema_hall_has_MovieController extends Controller
             return false;
         }
     }
+
 }

@@ -3,29 +3,32 @@
 {% block body %}
     <h1>Lista sal kinowych</h1>
 
-    <a href="{{ path('cinema_hall_new') }}">Dodaj salę</a><br><br>
-
     <div class="table-responsive">
         <table class="table">
             <thead>
                 <tr>
+                    <th>Id</th>
                     <th>Number</th>
-                    <th>cinemaId</th>
+                    <th>Amount of Seats</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
             {% for cinema_hall in cinema_halls %}
                 <tr>
+                    <td><a href="{{ path('cinema_hall_show', { 'id': cinema_hall.id }) }}">{{ cinema_hall.id }}</a></td>
                     <td>{{ cinema_hall.number }}</td>
-                    <td>{{ cinema_hall.cinemaId }}</td>
+                    <td>{{ cinema_hall.seats }}</td>
                     <td>
                         <ul>
                             <li>
-                                <a href="{{ path('cinema_hall_show', { 'id': cinema_hall.id }) }}">Pokaż</a>
+                                <a href="{{ path('cinema_hall_show', { 'id': cinema_hall.id }) }}">show</a>
                             </li>
                             <li>
-                                <a href="{{ path('cinema_hall_edit', { 'id': cinema_hall.id }) }}">Edytuj</a>
+                                <a href="{{ path('cinema_hall_edit', { 'id': cinema_hall.id }) }}">edit</a>
+                            </li>
+                            <li>
+                                <a href="{{ path('cinema_hall_set_seats', { 'id': cinema_hall.id }) }}">set seats</a>
                             </li>
                         </ul>
                     </td>
@@ -34,5 +37,9 @@
             </tbody>
         </table>
     </div>
-
+    <ul>
+        <li>
+            <a href="{{ path('cinema_hall_new') }}">Create a new cinema_hall</a>
+        </li>
+    </ul>
 {% endblock %}

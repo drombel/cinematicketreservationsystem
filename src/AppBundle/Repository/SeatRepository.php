@@ -10,4 +10,21 @@ namespace AppBundle\Repository;
  */
 class SeatRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function deleteSeatsByCinemaHall($cinemaHallId)
+    {
+        $query = $this->getEntityManager()
+            ->createQuery(
+                'DELETE FROM AppBundle:Seat m WHERE m.cinema_hallId = :id'
+            )->setParameter('id', $cinemaHallId);
+        return $query->getResult();
+    }
+
+    public function getAmountOfSeatsByCinemaHall($cinemaHallId)
+    {
+        $query = $this->getEntityManager()
+            ->createQuery(
+                'SELECT COUNT(m.id) FROM AppBundle:Seat m WHERE m.cinema_hallId = :id'
+            )->setParameter('id', $cinemaHallId);
+        return $query->getSingleScalarResult();
+    }
 }

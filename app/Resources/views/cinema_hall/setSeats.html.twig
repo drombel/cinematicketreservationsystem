@@ -1,0 +1,16 @@
+{% extends 'base_panel.html.twig' %}
+
+{% block body %}
+    <h1>Setting new seats for Cinema_hall</h1>
+
+    {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <input type="submit" value="Set" />
+    {{ form_end(form) }}
+
+    <ul>
+        <li>
+            <a href="{{ path('cinema_hall_index') }}">Back to the list</a>
+        </li>
+    </ul>
+{% endblock %}

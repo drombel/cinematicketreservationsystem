@@ -14,19 +14,19 @@
                 <td>{{ cinema_hall_has_Movie.cinemaHallId }}</td>
             </tr>
             <tr>
-                <th>Timestart</th>
+                <th>Od kiedy film jest w kinach</th>
                 <td>{% if cinema_hall_has_Movie.timeStart %}{{ cinema_hall_has_Movie.timeStart|date('Y-m-d H:i:s') }}{% endif %}</td>
             </tr>
             <tr>
-                <th>Timeend</th>
+                <th>Do kiedy film jest w kinach</th>
                 <td>{% if cinema_hall_has_Movie.timeEnd %}{{ cinema_hall_has_Movie.timeEnd|date('Y-m-d H:i:s') }}{% endif %}</td>
             </tr>
             <tr>
-                <th>Timemoviestart</th>
+                <th>Godzina rozpoczecia filmu</th>
                 <td>{% if cinema_hall_has_Movie.timeMovieStart %}{{ cinema_hall_has_Movie.timeMovieStart|date('H:i:s') }}{% endif %}</td>
             </tr>
             <tr>
-                <th>Timemovieend</th>
+                <th>Godzina zakonczenia filmu</th>
                 <td>{% if cinema_hall_has_Movie.timeMovieEnd %}{{ cinema_hall_has_Movie.timeMovieEnd|date('H:i:s') }}{% endif %}</td>
             </tr>
         </tbody>

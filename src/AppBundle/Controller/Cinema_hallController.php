@@ -29,6 +29,10 @@ class Cinema_hallController extends Controller
             $em = $this->getDoctrine()->getManager();
 
             $cinema_halls = $em->getRepository('AppBundle:Cinema_hall')->findAll();
+            $repoSeat = $em->getRepository(Seat::class);
+            foreach ($cinema_halls as $cinema_hall){
+                $cinema_hall->seats = $repoSeat->getAmountOfSeatsByCinemaHall($cinema_hall->getId());
+            }
 
             return $this->render('cinema_hall/index.html.twig', array(
                 'cinema_halls' => $cinema_halls,
@@ -36,6 +40,48 @@ class Cinema_hallController extends Controller
         } else {
             return $this->redirectToRoute('homepage');
         }
+    }
+
+    /**
+     * Setting amount of seats in cinema_hall entity.
+     *
+     * @Route("/set_seats", name="cinema_hall_set_seats")
+     * @Method({"GET", "POST"})
+     */
+    public function setSeatsAction(Request $request)
+    {
+        $form = $this->createForm('AppBundle\Form\SetSeatsType');
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $request->request->get('set_seats');
+            $rows = intval($data['rows']);
+            $cols = intval($data['cols']);
+            $cinemaHallId = $request->query->getInt('id');
+            if($rows > 0 && $cols > 0  && $cinemaHallId > 0){
+
+                $em = $this->getDoctrine()->getManager();
+                $cinemaHall = $em->find( Cinema_hall::class, $cinemaHallId);
+                $repoSeat = $em->getRepository(Seat::class);
+                $emSeat = $this->getDoctrine()->getManagerForClass('AppBundle:Seat');
+                $repoSeat->deleteSeatsByCinemaHall($cinemaHallId);
+                for ($rowIndex = 1; $rowIndex <= $rows; $rowIndex++) {
+                    for ($colIndex = 1; $colIndex <= $cols; $colIndex++) {
+                        $seat = new Seat();
+                        $seat->setcinema_hallId($cinemaHall);
+                        $seat->setRow($rowIndex);
+                        $seat->setCol($colIndex);
+                        $emSeat->persist($seat);
+                    }
+                }
+                $emSeat->flush();
+            }
+            return $this->redirectToRoute('cinema_hall_index');
+        }
+
+        return $this->render('cinema_hall/setSeats.html.twig', array(
+            'form' => $form->createView(),
+        ));
     }
 
     /**

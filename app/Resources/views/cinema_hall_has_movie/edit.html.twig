@@ -2,6 +2,9 @@
 
 {% block body %}
     <h1>Edycja sali kinowej z filmami</h1>
+    {% if error != "" %}
+        <h3 class="text-white bg-danger p-2">{{ error }}</h3>
+    {% endif %}
 
     {{ form_start(edit_form) }}
         {{ form_widget(edit_form) }}

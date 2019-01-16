@@ -3,8 +3,6 @@
 namespace AppBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -18,6 +16,7 @@ class TicketType extends AbstractType
         $builder
             ->add('cinemaHallHasMovieId')
             ->add('seatId')
+            ->add('date')
             ->add('email', EmailType::class, array(
                 'label' => 'E-mail',
                 'attr' => array('class' => 'form-control'),

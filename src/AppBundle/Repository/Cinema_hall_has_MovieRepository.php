@@ -2,6 +2,7 @@
 
 namespace AppBundle\Repository;
 
+use AppBundle\Entity\Cinema_hall_has_Movie;
 /**
  * Cinema_hall_has_MovieRepository
  *
@@ -11,4 +12,47 @@ namespace AppBundle\Repository;
 class Cinema_hall_has_MovieRepository extends \Doctrine\ORM\EntityRepository
 {
 
+    /**
+     * @param $cinema_hall_has_Movie
+     * @return bool
+     */
+    public function isCinemaHallFreeWithDate($cinema_hall_has_Movie){
+        $id = $cinema_hall_has_Movie;
+        $id = !$id?0:1;
+        $cinemaHallId = $cinema_hall_has_Movie->getCinemaHallId();
+        $timeMovieStart = $cinema_hall_has_Movie->getTimeMovieStart()->format('H:i:s');
+        $timeMovieEnd = $cinema_hall_has_Movie->getTimeMovieEnd()->format('H:i:s');
+        $timeStart = $cinema_hall_has_Movie->getTimeStart()->format('Y-m-d');
+        $timeEnd = $cinema_hall_has_Movie->getTimeEnd()->format('Y-m-d');
+
+        $connection = $this->getEntityManager()
+            ->getConnection();
+        $query = $connection->prepare(
+            'SELECT * FROM cinema_hall_has__movie WHERE 
+                (id != :id) AND
+                (cinema_hallId = :cinemaHallId) AND
+                (
+                    (:time_movie_start < time(time_movie_start) AND time(time_movie_end) < :time_movie_end) OR      
+                    (
+                    	(:time_movie_start BETWEEN time(time_movie_start) AND time(time_movie_end)) OR
+                    	(:time_movie_end BETWEEN time(time_movie_start) AND time(time_movie_end))
+                    )
+                )
+                 AND
+                (:time_start < date(time_start) AND date(time_end) < :time_end) OR      
+                (
+                    (:time_start BETWEEN date(time_start) AND date(time_end)) OR
+                    (:time_end BETWEEN date(time_start) AND date(time_end))
+                )
+            ');
+        $query->bindValue('id', $id);
+        $query->bindValue('cinemaHallId',$cinemaHallId);
+        $query->bindValue('time_movie_start', $timeMovieStart);
+        $query->bindValue('time_movie_end', $timeMovieEnd);
+        $query->bindValue('time_start', $timeStart);
+        $query->bindValue('time_end', $timeEnd);
+        $query->execute();
+        $result = $query->fetchAll();
+        return count($result)==0;
+    }
 }

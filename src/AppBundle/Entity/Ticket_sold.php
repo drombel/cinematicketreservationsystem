@@ -64,6 +64,13 @@ class Ticket_sold
     private $seat;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="date", type="date")
+     */
+    private $date;
+
+    /**
      * @var int
      *
      * @ORM\ManyToOne(targetEntity="user")
@@ -311,5 +318,23 @@ class Ticket_sold
     {
         return $this->status;
     }
+
+
+    /**
+     * @return \DateTime
+     */
+    public function getDate()
+    {
+        return $this->date;
+    }
+
+    /**
+     * @param \DateTime $date
+     */
+    public function setDate($date)
+    {
+        $this->date = $date;
+    }
+
 }
 

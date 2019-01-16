@@ -2,38 +2,38 @@
 
 {% block body %}
     <h1>Lista sal kinowych z filmami</h1>
-
     <a href="{{ path('cinema_hall_has_movie_new') }}">Dodaj salę z filmem</a><br><br>
-
     <div class="table-responsive">
         <table class="table">
             <thead>
                 <tr>
+                    <th>Id</th>
                     <th>Movieid</th>
                     <th>Cinemahallid</th>
-                    <th>Timestart</th>
-                    <th>Timeend</th>
-                    <th>Timemoviestart</th>
-                    <th>Timemovieend</th>
+                    <th>Od kiedy film jest w kinach</th>
+                    <th>Do kiedy film jest w kinach</th>
+                    <th>Godzina rozpoczecia filmu</th>
+                    <th>Godzina zakonczenia filmu</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
             {% for cinema_hall_has_Movie in cinema_hall_has_Movies %}
                 <tr>
+                    <td><a href="{{ path('cinema_hall_has_movie_show', { 'id': cinema_hall_has_Movie.id }) }}">{{ cinema_hall_has_Movie.id }}</a></td>
                     <td>{{ cinema_hall_has_Movie.movieId }}</td>
                     <td>{{ cinema_hall_has_Movie.cinemaHallId }}</td>
-                    <td>{% if cinema_hall_has_Movie.timeStart %}{{ cinema_hall_has_Movie.timeStart|date('Y-m-d H:i:s') }}{% endif %}</td>
-                    <td>{% if cinema_hall_has_Movie.timeEnd %}{{ cinema_hall_has_Movie.timeEnd|date('Y-m-d H:i:s') }}{% endif %}</td>
-                    <td>{% if cinema_hall_has_Movie.timeMovieStart %}{{ cinema_hall_has_Movie.timeMovieStart|date('H:i:s') }}{% endif %}</td>
-                    <td>{% if cinema_hall_has_Movie.timeMovieEnd %}{{ cinema_hall_has_Movie.timeMovieEnd|date('H:i:s') }}{% endif %}</td>
+                    <td>{% if cinema_hall_has_Movie.timeStart %}{{ cinema_hall_has_Movie.timeStart|date('Y-m-d') }}{% endif %}</td>
+                    <td>{% if cinema_hall_has_Movie.timeEnd %}{{ cinema_hall_has_Movie.timeEnd|date('Y-m-d') }}{% endif %}</td>
+                    <td>{% if cinema_hall_has_Movie.timeMovieStart %}{{ cinema_hall_has_Movie.timeMovieStart|date('H:i') }}{% endif %}</td>
+                    <td>{% if cinema_hall_has_Movie.timeMovieEnd %}{{ cinema_hall_has_Movie.timeMovieEnd|date('H:i') }}{% endif %}</td>
                     <td>
                         <ul>
                             <li>
-                                <a href="{{ path('cinema_hall_has_movie_show', { 'id': cinema_hall_has_Movie.id }) }}">Pokaż</a>
+                                <a href="{{ path('cinema_hall_has_movie_show', { 'id': cinema_hall_has_Movie.id }) }}">show</a>
                             </li>
                             <li>
-                                <a href="{{ path('cinema_hall_has_movie_edit', { 'id': cinema_hall_has_Movie.id }) }}">Edytuj</a>
+                                <a href="{{ path('cinema_hall_has_movie_edit', { 'id': cinema_hall_has_Movie.id }) }}">edit</a>
                             </li>
                         </ul>
                     </td>
@@ -42,5 +42,9 @@
             </tbody>
         </table>
     </div>
-
+    <ul>
+        <li>
+            <a href="{{ path('cinema_hall_has_movie_new') }}">Create a new cinema_hall_has_Movie</a>
+        </li>
+    </ul>
 {% endblock %}
