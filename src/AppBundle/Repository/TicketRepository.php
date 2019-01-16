@@ -16,7 +16,7 @@ class TicketRepository extends \Doctrine\ORM\EntityRepository
             ->createQuery(
                 'SELECT cm FROM AppBundle:Cinema_hall_has_Movie cm WHERE cm.movieId = :movieId AND cm.cinemaHallId IN (
                         SELECT ch.id FROM AppBundle:Cinema_hall ch WHERE ch.cinemaId = :cinemaId
-                    )'
+                    ) ORDER BY cm.timeMovieStart'
             )->setParameters(['movieId'=>$movieId, 'cinemaId'=>$cinemaId]);
         return $query->getResult();
     }

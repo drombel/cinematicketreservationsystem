@@ -5,7 +5,7 @@
     <select name="cinemaHallHasMovieId" id="cinemaHallHasMovieId">
         <option value="" disabled="disabled">Wybierz seans</option>
         {% for chm in Cinema_hall_has_Movie %}
-            <option value="{{ chm.movieId }}_{{ chm.cinemaHallId }}">{{ chm.timeMovieStart|date('H:i') }} - {{ chm.timeMovieEnd|date('H:i') }}</option>
+            <option value="{{ chm.id }}">{{ chm.timeMovieStart|date('H:i') }} - {{ chm.timeMovieEnd|date('H:i') }}</option>
         {% endfor %}
     </select>
     <button id="orderTicketStep2" class="btn btn-dark text-uppercase d-block">zamów bilet</button>

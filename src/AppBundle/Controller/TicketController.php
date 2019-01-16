@@ -11,6 +11,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Entity;
 use Symfony\Component\Validator\Constraints\Time;
+use \Datetime;
+use \DateInterval;
 
 /**
  * Ticket controller.
@@ -88,23 +90,75 @@ class TicketController extends Controller
      */
     public function stepTwoAction(Request $request)
     {
+        // kiedy seans
 
         $cinemaId = $request->request->getInt("cinemaId");
         $movieId = $request->request->getInt("movieId");
         $cinemaHallHasMovieId = $request->request->getInt("cinemaHallHasMovieId");
 
         $data = [];
+        if ($cinemaId>0 && $movieId>0 && $cinemaHallHasMovieId>0){
+            //dni do wyboru max tydzien do przodu, od dzisiejszej daty do +7 chyba ze data koncwa jest mniejsza
+            $em = $this->getDoctrine()->getManager();
+
+            $repoCHHM = $em->getRepository('AppBundle:Cinema_hall_has_Movie');
+            $Cinema_hall_has_Movie = $repoCHHM->find($cinemaHallHasMovieId);
+
+            $now = new DateTime();
+            $dateBeginMovieToday = new DateTime($now->format('Y-m-d')." ".$Cinema_hall_has_Movie->getTimeMovieStart()->format('H:i'));
+            $dateEndMovie = new DateTime($Cinema_hall_has_Movie->getTimeEnd()->format('Y-m-d')." ".$Cinema_hall_has_Movie->getTimeMovieStart()->format('H:i'));
+            $dates = [];
+            $week = 7;
+
+            // sprawdzenie czy dzisiaj jeszcze bedzie grane
+            if ($now < $dateBeginMovieToday){
+                $dates[] = new DateTime($now->format('Y-m-d'));
+            }
+
+            // tworzenie listy dat
+            for ($i = count($dates); $i < $week; $i++){
+                $now->add(new DateInterval('P1D')); // dodaje 1 dzien
+                // sprawdza czy aktualnie sprawdzana data jest mniejsza od makymalnej tego filmu
+                if($now < $dateEndMovie){ $dates[] = new DateTime($now->format('Y-m-d')); }
+                else{ break; }
+            }
+
+            $data['dates'] = $dates;
+        }else{
+            echo "Błędne dane";
+        }
+        return $this->render('ticket/step_two.html.twig', $data);
+    }
+
+    /**
+     * Step 3 of tickets reservation.
+     *
+     * @Route("/step-3", name="ticket_step_3")
+     * @Method({"POST"})
+     */
+    public function stepThreeAction(Request $request)
+    {
+
+        $cinemaId = $request->request->getInt("cinemaId");
+        $movieId = $request->request->getInt("movieId");
+        $cinemaHallHasMovieId = $request->request->getInt("cinemaHallHasMovieId");
+        $date = new DateTime($request->request->get("date"));
 
         if ( $cinemaId > 0 && $movieId > 0 && $cinemaHallHasMovieId > 0 ){
-            //siedzenia i mail
+            //siedzenia i email
             $em = $this->getDoctrine()->getManager();
 
             $repoCHHM = $em->getRepository('AppBundle:Cinema_hall_has_Movie');
             $Cinema_hall_has_Movie = $repoCHHM->find($cinemaHallHasMovieId);
             $cinemaHallId = $Cinema_hall_has_Movie->getCinemaHallId();
 
+            if (!$this->isDateAllowed($Cinema_hall_has_Movie, $date)){
+                echo 'niepoprawna data';
+                exit();// zmienic ta wiadomosc na cos sensownego // later
+            }
+
             $seats = $this->getSeats($cinemaHallId);
-            $seatsTaken = $this->getSeatsTaken($cinemaHallHasMovieId);
+            $seatsTaken = $this->getSeatsTaken($cinemaHallHasMovieId, $date);
             $seatsSorted = $this->sortSeats($seats, $seatsTaken);
 
             $data = ['seatsSorted'=>$seatsSorted];
@@ -117,21 +171,22 @@ class TicketController extends Controller
 
         if ($securityContext->isGranted('IS_AUTHENTICATED_FULLY')) $data['isLogged'] = true;
 
-        return $this->render('ticket/step_two.html.twig', $data);
+        return $this->render('ticket/step_three.html.twig', $data);
     }
 
     /**
-     * Step 3 of tickets reservation.
+     * Step 4 of tickets reservation.
      *
-     * @Route("/step-3", name="ticket_step_3")
+     * @Route("/step-4", name="ticket_step_4")
      * @Method({"POST"})
      */
-    public function stepThreeAction(Request $request, \Swift_Mailer $mailer)
+    public function stepFourAction(Request $request, \Swift_Mailer $mailer)
     {
 
         $cinemaId = $request->request->getInt("cinemaId");
         $movieId = $request->request->getInt("movieId");
         $cinemaHallHasMovieId = $request->request->getInt("cinemaHallHasMovieId");
+        $date = new DateTime($request->request->get("date"));
         $seatIds = $request->request->get("seats");
         $email = $request->request->get("email");
         $name = $request->request->get("name");
@@ -142,11 +197,9 @@ class TicketController extends Controller
 
         foreach ($seatIds as $key=>$seat){
             $value = intval($seat);
-            if($value > 0 && is_numeric($value)){
-                $seatIds[$key] = $value;
-            }else{
-                unset($seatIds[$key]);
-            }
+            if($value > 0 && is_numeric($value))
+            {$seatIds[$key] = $value;}
+            else{unset($seatIds[$key]);}
         }
 
         $data = [];
@@ -158,11 +211,18 @@ class TicketController extends Controller
             $amountOfSeats == count($seatIds) &&
             filter_var($email, FILTER_VALIDATE_EMAIL)
         ){
-            //caly ticket
+            //caly ticket i wysylanie maila
             $em = $this->getDoctrine()->getManager();
             $flag = true;
 
-            $seatsTaken = $this->getSeatsTaken($cinemaHallHasMovieId);
+            $repoCHHM = $em->getRepository('AppBundle:Cinema_hall_has_Movie');
+            $Cinema_hall_has_Movie = $repoCHHM->find($cinemaHallHasMovieId);
+
+            if (!$this->isDateAllowed($Cinema_hall_has_Movie, $date)){
+                $flag = false;
+            }
+
+            $seatsTaken = $this->getSeatsTaken($cinemaHallHasMovieId, $date);
             foreach ($seatIds as $seat){
                 if(in_array($seat, $seatsTaken)) $flag = false;
             }
@@ -176,12 +236,12 @@ class TicketController extends Controller
                 $ticket->setUserId($userId);
             }
             $ticket->setStatus('Pending');
-
-            $this->sendEmail($email, $cinemaId, $movieId, $seatIds,$cinemaHallHasMovieId, $name, $surname, $ticket->getId(), $mailer);
+            $ticket->setDate($date);
 
             if($flag == true){
                 $em->persist($ticket);
                 $em->flush();
+                $this->sendEmail($email, $cinemaId, $movieId, $seatIds, $cinemaHallHasMovieId, $name, $surname, $ticket->getId(), $mailer);
             }
 
             $data['flag'] = $flag;
@@ -191,9 +251,8 @@ class TicketController extends Controller
             exit();
         }
 
-        return $this->render('ticket/step_three.html.twig', $data);
+        return $this->render('ticket/step_four.html.twig', $data);
         // potem wszystko sie pozmienia zeby wygladalo fancy,
-        // nastepnie pobrac siedzenia
 
         // jeszcze gdzies maila wstawic i bedzie bilet, wtedy to zabezpieczenia i rzeczy panelowe
     }
@@ -333,10 +392,14 @@ class TicketController extends Controller
         return $seatsSorted;
     }
 
-    private function getSeatsTaken($cinemaHallHasMovieId){
+    private function getSeatsTaken($cinemaHallHasMovieId, $date){
         $em = $this->getDoctrine()->getManager();
         $repoTicket = $em->getRepository('AppBundle:Ticket');
-        $tickets = $repoTicket->findBy(['cinemaHallHasMovieId'=>$cinemaHallHasMovieId,'status'=>'pending']);
+        $tickets = $repoTicket->findBy([
+            'cinemaHallHasMovieId' => $cinemaHallHasMovieId,
+            'status' => ['Pending','Ok'],
+            'date' => $date]
+        );
         $seatsTaken = [];
         foreach ($tickets as $ticket){
             foreach($ticket->getSeatId() as $seatId)
@@ -374,49 +437,25 @@ class TicketController extends Controller
         $time = strtotime($time) + 1800;
         $time = date('H:i:s', $time);
 
-        if($name == '' && $surname == ''){
-            $message = (new \Swift_Message('Rezerwacja biletu - TicketManiac'))
-                ->setFrom('ticketmaniac2018@gmail.com')
-                ->setTo($email)
-                ->setBody(
-                    $this->renderView(
-                        'Emails/ticket.html.twig', array(
-                            'name' => $user->getName(),
-                            'surname' => $user->getSurname(),
-                            'cinema' => $cinema,
-                            'movie' => $movie,
-                            'chm' => $chm->getTimeMovieStart()->format('H:i:s'),
-                            'cinemaHall' => $cinemaHallNumber,
-                            'seats' => $seats,
-                            'numberOfSeats' => $numberOfSeats,
-                            'time' => $time,
-                            'ticket' => $ticket
-                        )
-                    ),
-                    'text/html'
-                );
-        } else {
-            $message = (new \Swift_Message('Rezerwacja biletu - TicketManiac'))
-                ->setFrom('ticketmaniac2018@gmail.com')
-                ->setTo($email)
-                ->setBody(
-                    $this->renderView(
-                        'Emails/ticket.html.twig', array(
-                            'name' => $name,
-                            'surname' => $surname,
-                            'cinema' => $cinema,
-                            'movie' => $movie,
-                            'chm' => $chm->getTimeMovieStart()->format('H:i:s'),
-                            'cinemaHall' => $cinemaHallNumber,
-                            'seats' => $seats,
-                            'numberOfSeats' => $numberOfSeats,
-                            'time' => $time,
-                            'ticket' => $ticket
-                        )
-                    ),
-                    'text/html'
-                );
-        }
+        $data = [
+            'name' => $name!=''?$name:$user->getName(),
+            'surname' => $surname!=''?$surname:$user->getName(),
+            'cinema' => $cinema,
+            'movie' => $movie,
+            'chm' => $chm->getTimeMovieStart()->format('H:i:s'),
+            'cinemaHall' => $cinemaHallNumber,
+            'seats' => $seats,
+            'numberOfSeats' => $numberOfSeats,
+            'time' => $time,
+            'ticket' => $ticket
+        ];
+
+        $message = (new \Swift_Message('Rezerwacja biletu - TicketManiac'))
+            ->setFrom('ticketmaniac2018@gmail.com')
+            ->setTo($email)
+            ->setBody(
+                $this->renderView('Emails/ticket.html.twig', $data),
+                'text/html');
 
         $mailer->send($message);
     }
@@ -440,5 +479,11 @@ class TicketController extends Controller
         } else {
             return false;
         }
+    }
+
+    private function isDateAllowed($Cinema_hall_has_Movie, $date){
+        $dateBeginMovie = $Cinema_hall_has_Movie->getTimeStart();
+        $dateEndMovie = new DateTime($Cinema_hall_has_Movie->getTimeEnd()->format('Y-m-d')." ".$Cinema_hall_has_Movie->getTimeMovieStart()->format('H:i'));
+        return ($dateBeginMovie < $date && $date < $dateEndMovie); // albo z negacja
     }
 }

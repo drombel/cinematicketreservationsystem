@@ -79,8 +79,7 @@
                     ticketData.movieId > 0 &&
                     ticketData.cinemaId > 0 &&
                     ticketData.cinemaHallHasMovieId > 0 &&
-                    ticketData.seats.length > 0,
-                        validateEmail(ticketData.email)
+                    validateDate(ticketData.date)
                 ){
                     $.ajax({
                         method: "POST",
@@ -88,11 +87,35 @@
                         data: ticketData,
                         complete: function (response) {
                             $('.movie-main-description').append(response.responseText);
-                            $('[name="seatId"]').click(function() { return false; });
-                            $('#name').attr('disabled','');
-                            $('#email').attr('disabled','');
-                            $('#surname').attr('disabled','');
+                            $('#cinemaHallHasMovieDate').attr('disabled','');
                             $('#orderTicketStep3').remove();
+                        }
+                    });
+                }else{
+                    alert('brak danych'); // zmienic na jakis czerwony napis nad danymi polami
+                }
+            });
+
+            $('body').on('click','#orderTicketStep4',function () {
+                var ticketData = getData();
+                if(
+                    ticketData.movieId > 0 &&
+                    ticketData.cinemaId > 0 &&
+                    ticketData.cinemaHallHasMovieId > 0 &&
+                    ticketData.seats.length > 0 &&
+                    validateEmail(ticketData.email) &&
+                    validateDate(ticketData.date) &&
+                    ticketData.name != "" && ticketData.surname != ""
+                ){
+                    $.ajax({
+                        method: "POST",
+                        url: "{{ path('ticket_step_4') }}",
+                        data: ticketData,
+                        complete: function (response) {
+                            $('.movie-main-description').append(response.responseText);
+                            $('[name="seatId"]').click(function() { return false; });
+                            $('#name, #email, #surname').attr('disabled','');
+                            $('#orderTicketStep4').remove();
                         }
                     });
                 }else{
@@ -109,8 +132,10 @@
                     seats = [], seatId = 0,
                     name = $('#name').val(),
                     surname = $('#surname').val(),
-                    email =  $('#email').val()
+                    email =  $('#email').val(),
+                    date = $('#cinemaHallHasMovieDate').val()
                 ;
+
 
                 $('[name="seatId"]:checked').each(function(index) {
                     seatId = parseInt($(this).val());
@@ -124,14 +149,20 @@
                     seats: seats,
                     name: name,
                     surname: surname,
-                    email: email
+                    email: email,
+                    date: date
                 };
             }
 
-        function validateEmail(email) {
-            var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-            return re.test(String(email).toLowerCase());
-        }
+            function validateEmail(email) {
+                var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+                return re.test(String(email).toLowerCase());
+            }
+
+            function validateDate(date) {
+                date = new Date(date);
+                return (date instanceof Date && !isNaN(date));
+            }
         });
     </script>
 {% endblock %}
