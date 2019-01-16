@@ -25,36 +25,27 @@ class Cinema_hall_has_MovieController extends Controller
         $loggedUser = $this->get('security.token_storage')->getToken()->getUser();
         $hasAccess = $this->hasAccess($loggedUser);
 
-        if($hasAccess) {
-            $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
-            $em = $this->getDoctrine()->getManager();
+        if(!$hasAccess) return $this->redirectToRoute('homepage');
 
-            if ($loggedUserRole === 'moderator') {
-                $cinema = $em->getRepository('AppBundle:Cinema')->findBy(array('city'=>$loggedUser->getCity()));
-                $cinema_halls = $em->getRepository('AppBundle:Cinema_hall')->findBy(array('cinemaId'=>$cinema));
-                $cinema_hall_has_Movies = $em->getRepository('AppBundle:Cinema_hall_has_Movie')->findBy(array('cinemaHallId'=>$cinema_halls));
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $em = $this->getDoctrine()->getManager();
 
-                return $this->render('cinema_hall_has_movie/index.html.twig', array(
-                    'cinema_hall_has_Movies' => $cinema_hall_has_Movies,
-                ));
-            } elseif ($loggedUserRole === 'supervisior') {
-                $cinema = $em->getRepository('AppBundle:Cinema')->findBy(array('id'=>$loggedUser->getCinema()));
-                $cinema_halls = $em->getRepository('AppBundle:Cinema_hall')->findBy(array('cinemaId'=>$cinema));
-                $cinema_hall_has_Movies = $em->getRepository('AppBundle:Cinema_hall_has_Movie')->findBy(array('cinemaHallId'=>$cinema_halls));
-                return $this->render('cinema_hall_has_movie/index.html.twig', array(
-                    'cinema_hall_has_Movies' => $cinema_hall_has_Movies,
-                ));
-            } else {
-                $cinema_hall_has_Movies = $em->getRepository('AppBundle:Cinema_hall_has_Movie')->findAll();
-
-                return $this->render('cinema_hall_has_movie/index.html.twig', array(
-                    'cinema_hall_has_Movies' => $cinema_hall_has_Movies,
-                ));
-            }
-
-        } else {
-            return $this->redirectToRoute('homepage');
+        if ($loggedUserRole === 'moderator') {
+            $cinema = $em->getRepository('AppBundle:Cinema')->findBy(array('city'=>$loggedUser->getCity()));
+            $cinema_halls = $em->getRepository('AppBundle:Cinema_hall')->findBy(array('cinemaId'=>$cinema));
         }
+        if ($loggedUserRole === 'supervisior') {
+            $cinema = $em->getRepository('AppBundle:Cinema')->findBy(array('id'=>$loggedUser->getCinema()));
+            $cinema_halls = $em->getRepository('AppBundle:Cinema_hall')->findBy(array('cinemaId'=>$cinema));
+        }
+        if ($loggedUserRole === 'moderator' || $loggedUserRole === 'supervisior') {
+            $cinema_hall_has_Movies = $em->getRepository('AppBundle:Cinema_hall_has_Movie')->findBy(array('cinemaHallId'=>$cinema_halls));
+        }else{
+            $cinema_hall_has_Movies = $em->getRepository('AppBundle:Cinema_hall_has_Movie')->findAll();
+        }
+        return $this->render('cinema_hall_has_movie/index.html.twig', array(
+            'cinema_hall_has_Movies' => $cinema_hall_has_Movies,
+        ));
     }
 
     /**
@@ -68,34 +59,32 @@ class Cinema_hall_has_MovieController extends Controller
         $loggedUser = $this->get('security.token_storage')->getToken()->getUser();
         $hasAccess = $this->hasAccess($loggedUser);
 
-        if($hasAccess) {
-            $cinema_hall_has_Movie = new Cinema_hall_has_movie();
-            $form = $this->createForm('AppBundle\Form\Cinema_hall_has_MovieType', $cinema_hall_has_Movie);
-            $form->handleRequest($request);
-            $error = "";
+        if(!$hasAccess) return $this->redirectToRoute('homepage');
 
-            if ($form->isSubmitted() && $form->isValid()) {
-                $em = $this->getDoctrine()->getManager();
+        $cinema_hall_has_Movie = new Cinema_hall_has_movie();
+        $form = $this->createForm('AppBundle\Form\Cinema_hall_has_MovieType', $cinema_hall_has_Movie);
+        $form->handleRequest($request);
+        $error = "";
 
-                $repo = $em->getRepository(Cinema_hall_has_Movie::class);
-                $isCinemaHallFreeWithDate = $repo->isCinemaHallFreeWithDate($cinema_hall_has_Movie);
-                if ($isCinemaHallFreeWithDate){
-                    $em->persist($cinema_hall_has_Movie);
-                    $em->flush();
-                    return $this->redirectToRoute('cinema_hall_has_movie_show', array('id' => $cinema_hall_has_Movie->getId()));
-                }else{
-                    $error = "Błędne daty i godziny";
-                }
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+
+            $repo = $em->getRepository(Cinema_hall_has_Movie::class);
+            $isCinemaHallFreeWithDate = $repo->isCinemaHallFreeWithDate($cinema_hall_has_Movie);
+            if ($isCinemaHallFreeWithDate){
+                $em->persist($cinema_hall_has_Movie);
+                $em->flush();
+                return $this->redirectToRoute('cinema_hall_has_movie_show', array('id' => $cinema_hall_has_Movie->getId()));
+            }else{
+                $error = "Błędne daty i godziny";
             }
-
-            return $this->render('cinema_hall_has_movie/new.html.twig', array(
-                'cinema_hall_has_Movie' => $cinema_hall_has_Movie,
-                'error' => $error,
-                'form' => $form->createView(),
-            ));
-        } else {
-            return $this->redirectToRoute('homepage');
         }
+
+        return $this->render('cinema_hall_has_movie/new.html.twig', array(
+            'cinema_hall_has_Movie' => $cinema_hall_has_Movie,
+            'error' => $error,
+            'form' => $form->createView(),
+        ));
     }
 
     /**
@@ -109,51 +98,33 @@ class Cinema_hall_has_MovieController extends Controller
         $loggedUser = $this->get('security.token_storage')->getToken()->getUser();
         $hasAccess = $this->hasAccess($loggedUser);
 
-        if($hasAccess) {
+        if(!$hasAccess) return $this->redirectToRoute('homepage');
 
-            $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
-            $em = $this->getDoctrine()->getManager();
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $em = $this->getDoctrine()->getManager();
 
-            if ($loggedUserRole === 'moderator') {
-                $cinema = $em->getRepository('AppBundle:Cinema')->findBy(array('city'=>$loggedUser->getCity()));
-                $cinema_halls = $em->getRepository('AppBundle:Cinema_hall')->findBy(array('cinemaId'=>$cinema));
-                $cinema_hall_has_Movies = $em->getRepository('AppBundle:Cinema_hall_has_Movie')->findBy(array('cinemaHallId'=>$cinema_halls));
+        if ($loggedUserRole === 'moderator')
+            $cinema = $em->getRepository('AppBundle:Cinema')->findBy(array('city'=>$loggedUser->getCity()));
 
-                if (in_array($cinema_hall_has_Movie, $cinema_hall_has_Movies)) {
-                    $deleteForm = $this->createDeleteForm($cinema_hall_has_Movie);
+        if ($loggedUserRole === 'supervisior')
+            $cinema = $em->getRepository('AppBundle:Cinema')->findBy(array('id'=>$loggedUser->getCinema()));
 
-                    return $this->render('cinema_hall_has_movie/show.html.twig', array(
-                        'cinema_hall_has_Movie' => $cinema_hall_has_Movie,
-                        'delete_form' => $deleteForm->createView(),
-                    ));
-                } else {
-                    return $this->redirectToRoute('homepage');
-                }
-            } elseif ($loggedUserRole === 'supervisior') {
-                $cinema = $em->getRepository('AppBundle:Cinema')->findBy(array('id'=>$loggedUser->getCinema()));
-                $cinema_halls = $em->getRepository('AppBundle:Cinema_hall')->findBy(array('cinemaId'=>$cinema));
-                $cinema_hall_has_Movies = $em->getRepository('AppBundle:Cinema_hall_has_Movie')->findBy(array('cinemaHallId'=>$cinema_halls));
-                if (in_array($cinema_hall_has_Movie, $cinema_hall_has_Movies)) {
-                    $deleteForm = $this->createDeleteForm($cinema_hall_has_Movie);
-
-                    return $this->render('cinema_hall_has_movie/show.html.twig', array(
-                        'cinema_hall_has_Movie' => $cinema_hall_has_Movie,
-                        'delete_form' => $deleteForm->createView(),
-                    ));
-                } else {
-                    return $this->redirectToRoute('homepage');
-                }
-            } else {
+        if ($loggedUserRole === 'moderator' || $loggedUserRole === 'supervisior') {
+            $cinema_halls = $em->getRepository('AppBundle:Cinema_hall')->findBy(array('cinemaId'=>$cinema));
+            $cinema_hall_has_Movies = $em->getRepository('AppBundle:Cinema_hall_has_Movie')->findBy(array('cinemaHallId'=>$cinema_halls));
+            if (in_array($cinema_hall_has_Movie, $cinema_hall_has_Movies)) {
                 $deleteForm = $this->createDeleteForm($cinema_hall_has_Movie);
-
-                return $this->render('cinema_hall_has_movie/show.html.twig', array(
-                    'cinema_hall_has_Movie' => $cinema_hall_has_Movie,
-                    'delete_form' => $deleteForm->createView(),
-                ));
+            } else {
+                return $this->redirectToRoute('homepage');
             }
-        } else {
-            return $this->redirectToRoute('homepage');
+        }else{
+            $deleteForm = $this->createDeleteForm($cinema_hall_has_Movie);
         }
+
+        return $this->render('cinema_hall_has_movie/show.html.twig', array(
+            'cinema_hall_has_Movie' => $cinema_hall_has_Movie,
+            'delete_form' => $deleteForm->createView(),
+        ));
     }
 
     /**
@@ -166,50 +137,29 @@ class Cinema_hall_has_MovieController extends Controller
     {
         $loggedUser = $this->get('security.token_storage')->getToken()->getUser();
         $hasAccess = $this->hasAccess($loggedUser);
+        if(!$hasAccess) return $this->redirectToRoute('homepage');
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
+        $em = $this->getDoctrine()->getManager();
 
-        if($hasAccess) {
-            $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser()->getRole();
-            $em = $this->getDoctrine()->getManager();
+        if ($loggedUserRole === 'moderator')
+            $cinema = $em->getRepository('AppBundle:Cinema')->findBy(array('city'=>$loggedUser->getCity()));
 
-            if ($loggedUserRole === 'moderator') {
-                $cinema = $em->getRepository('AppBundle:Cinema')->findBy(array('city'=>$loggedUser->getCity()));
-                $cinema_halls = $em->getRepository('AppBundle:Cinema_hall')->findBy(array('cinemaId'=>$cinema));
-                $cinema_hall_has_Movies = $em->getRepository('AppBundle:Cinema_hall_has_Movie')->findBy(array('cinemaHallId'=>$cinema_halls));
+        if ($loggedUserRole === 'supervisior')
+            $cinema = $em->getRepository('AppBundle:Cinema')->findBy(array('id'=>$loggedUser->getCinema()));
 
-                if (in_array($cinema_hall_has_Movie, $cinema_hall_has_Movies)) {
-                    $deleteForm = $this->createDeleteForm($cinema_hall_has_Movie);
-                    $editForm = $this->createForm('AppBundle\Form\Cinema_hall_has_MovieType', $cinema_hall_has_Movie);
-                    $editForm->handleRequest($request);
+        if ($loggedUserRole === 'moderator' || $loggedUserRole === 'supervisior') {
+            $cinema_halls = $em->getRepository('AppBundle:Cinema_hall')->findBy(array('cinemaId'=>$cinema));
+            $cinema_hall_has_Movies = $em->getRepository('AppBundle:Cinema_hall_has_Movie')->findBy(array('cinemaHallId'=>$cinema_halls));
 
-                    if ($editForm->isSubmitted() && $editForm->isValid()) {
-                        $this->getDoctrine()->getManager()->flush();
+            if (!in_array($cinema_hall_has_Movie, $cinema_hall_has_Movies)) return $this->redirectToRoute('homepage');
+        }
 
-                        return $this->redirectToRoute('cinema_hall_has_movie_edit', array('id' => $cinema_hall_has_Movie->getId()));
-                    }
-
-                    return $this->render('cinema_hall_has_movie/edit.html.twig', array(
-                        'cinema_hall_has_Movie' => $cinema_hall_has_Movie,
-                        'edit_form' => $editForm->createView(),
-                        'delete_form' => $deleteForm->createView(),
-                    ));
-                } else {
-                    return $this->redirectToRoute('homepage');
-                }
-            } elseif ($loggedUserRole === 'supervisior') {
-                $cinema = $em->getRepository('AppBundle:Cinema')->findBy(array('id'=>$loggedUser->getCinema()));
-                $cinema_halls = $em->getRepository('AppBundle:Cinema_hall')->findBy(array('cinemaId'=>$cinema));
-                $cinema_hall_has_Movies = $em->getRepository('AppBundle:Cinema_hall_has_Movie')->findBy(array('cinemaHallId'=>$cinema_halls));
-                if (in_array($cinema_hall_has_Movie, $cinema_hall_has_Movies)) {
-                    $deleteForm = $this->createDeleteForm($cinema_hall_has_Movie);
-                    $editForm = $this->createForm('AppBundle\Form\Cinema_hall_has_MovieType', $cinema_hall_has_Movie);
-                    $editForm->handleRequest($request);
         $deleteForm = $this->createDeleteForm($cinema_hall_has_Movie);
         $editForm = $this->createForm('AppBundle\Form\Cinema_hall_has_MovieType', $cinema_hall_has_Movie);
         $editForm->handleRequest($request);
         $error = "";
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
-            $em = $this->getDoctrine()->getManager();
             $repo = $em->getRepository(Cinema_hall_has_Movie::class);
             $isCinemaHallFreeWithDate = $repo->isCinemaHallFreeWithDate($cinema_hall_has_Movie);
 
@@ -220,45 +170,11 @@ class Cinema_hall_has_MovieController extends Controller
                 $error = "Błędne daty i godziny";
             }
         }
-                    if ($editForm->isSubmitted() && $editForm->isValid()) {
-                        $this->getDoctrine()->getManager()->flush();
 
-                        return $this->redirectToRoute('cinema_hall_has_movie_edit', array('id' => $cinema_hall_has_Movie->getId()));
-                    }
-
-                    return $this->render('cinema_hall_has_movie/edit.html.twig', array(
-                        'cinema_hall_has_Movie' => $cinema_hall_has_Movie,
-                        'edit_form' => $editForm->createView(),
-                        'delete_form' => $deleteForm->createView(),
-                    ));
-                } else {
-                    return $this->redirectToRoute('homepage');
-                }
-            } else {
-                $deleteForm = $this->createDeleteForm($cinema_hall_has_Movie);
-                $editForm = $this->createForm('AppBundle\Form\Cinema_hall_has_MovieType', $cinema_hall_has_Movie);
-                $editForm->handleRequest($request);
-
-                if ($editForm->isSubmitted() && $editForm->isValid()) {
-                    $this->getDoctrine()->getManager()->flush();
-
-                    return $this->redirectToRoute('cinema_hall_has_movie_edit', array('id' => $cinema_hall_has_Movie->getId()));
-                }
-
-                return $this->render('cinema_hall_has_movie/edit.html.twig', array(
-                    'cinema_hall_has_Movie' => $cinema_hall_has_Movie,
-                    'edit_form' => $editForm->createView(),
-                    'delete_form' => $deleteForm->createView(),
-                ));
-            }
-        } else {
-            return $this->redirectToRoute('homepage');
-        }
         return $this->render('cinema_hall_has_movie/edit.html.twig', array(
             'cinema_hall_has_Movie' => $cinema_hall_has_Movie,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
-            'error' => $error,
         ));
     }
 

@@ -25,21 +25,19 @@ class Cinema_hallController extends Controller
         $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
         $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($hasAccess) {
-            $em = $this->getDoctrine()->getManager();
+        if(!$hasAccess) return $this->redirectToRoute('homepage');
 
-            $cinema_halls = $em->getRepository('AppBundle:Cinema_hall')->findAll();
-            $repoSeat = $em->getRepository(Seat::class);
-            foreach ($cinema_halls as $cinema_hall){
-                $cinema_hall->seats = $repoSeat->getAmountOfSeatsByCinemaHall($cinema_hall->getId());
-            }
+        $em = $this->getDoctrine()->getManager();
 
-            return $this->render('cinema_hall/index.html.twig', array(
-                'cinema_halls' => $cinema_halls,
-            ));
-        } else {
-            return $this->redirectToRoute('homepage');
+        $cinema_halls = $em->getRepository('AppBundle:Cinema_hall')->findAll();
+        $repoSeat = $em->getRepository(Seat::class);
+        foreach ($cinema_halls as $cinema_hall){
+            $cinema_hall->seats = $repoSeat->getAmountOfSeatsByCinemaHall($cinema_hall->getId());
         }
+
+        return $this->render('cinema_hall/index.html.twig', array(
+            'cinema_halls' => $cinema_halls,
+        ));
     }
 
     /**
@@ -95,26 +93,24 @@ class Cinema_hallController extends Controller
         $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
         $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($hasAccess) {
-            $cinema_hall = new Cinema_hall();
-            $form = $this->createForm('AppBundle\Form\Cinema_hallType', $cinema_hall);
-            $form->handleRequest($request);
+        if(!$hasAccess) return $this->redirectToRoute('homepage');
 
-            if ($form->isSubmitted() && $form->isValid()) {
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($cinema_hall);
-                $em->flush();
+        $cinema_hall = new Cinema_hall();
+        $form = $this->createForm('AppBundle\Form\Cinema_hallType', $cinema_hall);
+        $form->handleRequest($request);
 
-                return $this->redirectToRoute('cinema_hall_show', array('id' => $cinema_hall->getId()));
-            }
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($cinema_hall);
+            $em->flush();
 
-            return $this->render('cinema_hall/new.html.twig', array(
-                'cinema_hall' => $cinema_hall,
-                'form' => $form->createView(),
-            ));
-        } else {
-            return $this->redirectToRoute('homepage');
+            return $this->redirectToRoute('cinema_hall_show', array('id' => $cinema_hall->getId()));
         }
+
+        return $this->render('cinema_hall/new.html.twig', array(
+            'cinema_hall' => $cinema_hall,
+            'form' => $form->createView(),
+        ));
     }
 
     /**
@@ -128,16 +124,14 @@ class Cinema_hallController extends Controller
         $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
         $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($hasAccess) {
-            $deleteForm = $this->createDeleteForm($cinema_hall);
+        if(!$hasAccess) return $this->redirectToRoute('homepage');
 
-            return $this->render('cinema_hall/show.html.twig', array(
-                'cinema_hall' => $cinema_hall,
-                'delete_form' => $deleteForm->createView(),
-            ));
-        } else {
-            return $this->redirectToRoute('homepage');
-        }
+        $deleteForm = $this->createDeleteForm($cinema_hall);
+
+        return $this->render('cinema_hall/show.html.twig', array(
+            'cinema_hall' => $cinema_hall,
+            'delete_form' => $deleteForm->createView(),
+        ));
     }
 
     /**
@@ -151,25 +145,23 @@ class Cinema_hallController extends Controller
         $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
         $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($hasAccess) {
-            $deleteForm = $this->createDeleteForm($cinema_hall);
-            $editForm = $this->createForm('AppBundle\Form\Cinema_hallType', $cinema_hall);
-            $editForm->handleRequest($request);
+        if(!$hasAccess) return $this->redirectToRoute('homepage');
 
-            if ($editForm->isSubmitted() && $editForm->isValid()) {
-                $this->getDoctrine()->getManager()->flush();
+        $deleteForm = $this->createDeleteForm($cinema_hall);
+        $editForm = $this->createForm('AppBundle\Form\Cinema_hallType', $cinema_hall);
+        $editForm->handleRequest($request);
 
-                return $this->redirectToRoute('cinema_hall_edit', array('id' => $cinema_hall->getId()));
-            }
+        if ($editForm->isSubmitted() && $editForm->isValid()) {
+            $this->getDoctrine()->getManager()->flush();
 
-            return $this->render('cinema_hall/edit.html.twig', array(
-                'cinema_hall' => $cinema_hall,
-                'edit_form' => $editForm->createView(),
-                'delete_form' => $deleteForm->createView(),
-            ));
-        } else {
-            return $this->redirectToRoute('homepage');
+            return $this->redirectToRoute('cinema_hall_edit', array('id' => $cinema_hall->getId()));
         }
+
+        return $this->render('cinema_hall/edit.html.twig', array(
+            'cinema_hall' => $cinema_hall,
+            'edit_form' => $editForm->createView(),
+            'delete_form' => $deleteForm->createView(),
+        ));
     }
 
     /**
@@ -183,20 +175,17 @@ class Cinema_hallController extends Controller
         $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
         $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($hasAccess) {
-            $form = $this->createDeleteForm($cinema_hall);
-            $form->handleRequest($request);
+        if(!$hasAccess) return $this->redirectToRoute('homepage');
+        $form = $this->createDeleteForm($cinema_hall);
+        $form->handleRequest($request);
 
-            if ($form->isSubmitted() && $form->isValid()) {
-                $em = $this->getDoctrine()->getManager();
-                $em->remove($cinema_hall);
-                $em->flush();
-            }
-
-            return $this->redirectToRoute('cinema_hall_index');
-        } else {
-            return $this->redirectToRoute('homepage');
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($cinema_hall);
+            $em->flush();
         }
+
+        return $this->redirectToRoute('cinema_hall_index');
     }
 
     /**
