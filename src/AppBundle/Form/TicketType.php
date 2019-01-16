@@ -3,6 +3,8 @@
 namespace AppBundle\Form;
 
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -13,7 +15,20 @@ class TicketType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('cinemaHallHasMovieId')->add('seatId')->add('email')->add('status')->add('userId');
+        $builder
+            ->add('cinemaHallHasMovieId')
+            ->add('seatId')
+            ->add('email', EmailType::class, array(
+                'label' => 'E-mail',
+                'attr' => array('class' => 'form-control'),
+            ))
+            ->add('status', ChoiceType::class, array(
+            'choices'  => array(
+                'Zatwierdzono' => 'Ok',
+                'W toku' => 'Pending',
+                'Anulowano' => 'Canceled',
+            )))
+            ->add('userId');
     }
     
     /**

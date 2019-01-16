@@ -13,7 +13,16 @@ class Ticket_soldType extends AbstractType
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $builder->add('cinemaHallNumer')->add('city')->add('title')->add('price')->add('time')->add('seat')->add('email')->add('status')->add('userId');
+        $builder
+            ->add('cinemaHallNumer')
+            ->add('city')
+            ->add('title')
+            ->add('price')
+            ->add('time')
+            ->add('seat')
+            ->add('email')
+            ->add('status')
+            ->add('userId');
     }
     
     /**
