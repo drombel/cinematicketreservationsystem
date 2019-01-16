@@ -4,7 +4,7 @@
     W przypadku nieukończenia rezerwacji w czasie podanym poniżej,
     miejsca zostaną automatycznie odblokowane, a rezerwacja będzie musiała zostać
     rozpoczęta ponownie.
-    Pozostały czas blokady wybranych przez Państwa miejsc:</i> {{ time }}</p><br><br>
+    Pozostały czas blokady wybranych przez Państwa miejsc:</i> {{ 'now'|date_modify('+30minutes')|date('H:i:s') }}</p><br><br>
 
 Nabywca: {{ name }} {{ surname }}<br>
 Sprzedawca: {{ cinema.name }} {{ cinema.street }} {{ cinema.streetNumber }} {{ cinema.zipcode }}<br>

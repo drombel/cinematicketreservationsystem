@@ -433,10 +433,6 @@ class TicketController extends Controller
         }
         $numberOfSeats = count($seats);
 
-        $time = date('H:i:s');
-        $time = strtotime($time) + 1800;
-        $time = date('H:i:s', $time);
-
         $data = [
             'name' => $name!=''?$name:$user->getName(),
             'surname' => $surname!=''?$surname:$user->getName(),
@@ -446,7 +442,6 @@ class TicketController extends Controller
             'cinemaHall' => $cinemaHallNumber,
             'seats' => $seats,
             'numberOfSeats' => $numberOfSeats,
-            'time' => $time,
             'ticket' => $ticket
         ];
 
