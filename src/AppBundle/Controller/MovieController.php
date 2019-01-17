@@ -32,20 +32,17 @@ class MovieController extends Controller
         $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
         $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($hasAccess) {
+        if(!$hasAccess) return $this->redirectToRoute('homepage');
 
-            $em = $this->getDoctrine()->getManager();
+        $em = $this->getDoctrine()->getManager();
 
-            $movies = $em->getRepository('AppBundle:Movie')->findAll();
+        $movies = $em->getRepository('AppBundle:Movie')->findAll();
 
-            $movies = $this->setImages($movies);
+        $movies = $this->setImages($movies);
 
-            return $this->render('movie/index.html.twig', array(
-                'movies' => $movies,
-            ));
-        } else {
-            return $this->redirectToRoute('homepage');
-        }
+        return $this->render('movie/index.html.twig', array(
+            'movies' => $movies,
+        ));
     }
 
     /**
@@ -106,39 +103,37 @@ class MovieController extends Controller
         $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
         $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($hasAccess) {
-            $movie = new Movie();
-            $form = $this->createForm('AppBundle\Form\MovieType', $movie);
-            $form->handleRequest($request);
+        if(!$hasAccess) return $this->redirectToRoute('homepage');
 
-            if ($form->isSubmitted() && $form->isValid()) {
+        $movie = new Movie();
+        $form = $this->createForm('AppBundle\Form\MovieType', $movie);
+        $form->handleRequest($request);
 
-                $currentImage = $movie->getPoster();
-                if ($currentImage) {
-                    $orginalUploader = new FileUploader($this->getParameter('movie_images_poster_directory'));
-                    $movie->setPoster($orginalUploader->upload($currentImage));
-                }
+        if ($form->isSubmitted() && $form->isValid()) {
 
-                $currentImage = $movie->getScene();
-                if ($currentImage) {
-                    $extraUploader = new FileUploader($this->getParameter('movie_images_scene_directory'));
-                    $movie->setScene($extraUploader->upload($currentImage));
-                }
-
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($movie);
-                $em->flush();
-
-                return $this->redirectToRoute('movie_show', array('id' => $movie->getId()));
+            $currentImage = $movie->getPoster();
+            if ($currentImage) {
+                $orginalUploader = new FileUploader($this->getParameter('movie_images_poster_directory'));
+                $movie->setPoster($orginalUploader->upload($currentImage));
             }
 
-            return $this->render('movie/new.html.twig', array(
-                'movie' => $movie,
-                'form' => $form->createView(),
-            ));
-        } else {
-            return $this->redirectToRoute('homepage');
+            $currentImage = $movie->getScene();
+            if ($currentImage) {
+                $extraUploader = new FileUploader($this->getParameter('movie_images_scene_directory'));
+                $movie->setScene($extraUploader->upload($currentImage));
+            }
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($movie);
+            $em->flush();
+
+            return $this->redirectToRoute('movie_show', array('id' => $movie->getId()));
         }
+
+        return $this->render('movie/new.html.twig', array(
+            'movie' => $movie,
+            'form' => $form->createView(),
+        ));
     }
 
     /**
@@ -152,19 +147,17 @@ class MovieController extends Controller
         $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
         $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($hasAccess) {
-            $deleteForm = $this->createDeleteForm($movie);
-            //$images = $this->getImages($movie);
+        if(!$hasAccess) return $this->redirectToRoute('homepage');
 
-            $movie = $this->setImages($movie)[0];
+        $deleteForm = $this->createDeleteForm($movie);
+        //$images = $this->getImages($movie);
 
-            return $this->render('movie/show.html.twig', array(
-                'movie' => $movie,
-                'delete_form' => $deleteForm->createView(),
-            ));
-        } else {
-            return $this->redirectToRoute('homepage');
-        }
+        $movie = $this->setImages($movie)[0];
+
+        return $this->render('movie/show.html.twig', array(
+            'movie' => $movie,
+            'delete_form' => $deleteForm->createView(),
+        ));
     }
 
     /**
@@ -178,39 +171,37 @@ class MovieController extends Controller
         $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
         $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($hasAccess) {
-            $images = $this->getImages($movie);
+        if(!$hasAccess) return $this->redirectToRoute('homepage');
 
-            if (isset($images['poster'])) {
-                $file = new File($images['poster']['serverPath']);
-                $file->image_property = $images['poster']['webPath'];
-                $movie->setPoster($file);
-            }
+        $images = $this->getImages($movie);
 
-            if (isset($images['scene'])) {
-                $file = new File($images['scene']['serverPath']);
-                $file->image_property = $images['scene']['webPath'];
-                $movie->setScene($file);
-            }
-
-            $deleteForm = $this->createDeleteForm($movie);
-            $editForm = $this->createForm('AppBundle\Form\MovieType', $movie);
-            $editForm->handleRequest($request);
-
-            if ($editForm->isSubmitted() && $editForm->isValid()) {
-                $this->getDoctrine()->getManager()->flush();
-
-                return $this->redirectToRoute('movie_edit', array('id' => $movie->getId()));
-            }
-
-            return $this->render('movie/edit.html.twig', array(
-                'movie' => $movie,
-                'edit_form' => $editForm->createView(),
-                'delete_form' => $deleteForm->createView(),
-            ));
-        } else {
-            return $this->redirectToRoute('homepage');
+        if (isset($images['poster'])) {
+            $file = new File($images['poster']['serverPath']);
+            $file->image_property = $images['poster']['webPath'];
+            $movie->setPoster($file);
         }
+
+        if (isset($images['scene'])) {
+            $file = new File($images['scene']['serverPath']);
+            $file->image_property = $images['scene']['webPath'];
+            $movie->setScene($file);
+        }
+
+        $deleteForm = $this->createDeleteForm($movie);
+        $editForm = $this->createForm('AppBundle\Form\MovieType', $movie);
+        $editForm->handleRequest($request);
+
+        if ($editForm->isSubmitted() && $editForm->isValid()) {
+            $this->getDoctrine()->getManager()->flush();
+
+            return $this->redirectToRoute('movie_edit', array('id' => $movie->getId()));
+        }
+
+        return $this->render('movie/edit.html.twig', array(
+            'movie' => $movie,
+            'edit_form' => $editForm->createView(),
+            'delete_form' => $deleteForm->createView(),
+        ));
     }
 
     /**
@@ -224,20 +215,18 @@ class MovieController extends Controller
         $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
         $hasAccess = $this->hasAccess($loggedUserRole);
 
-        if($hasAccess) {
-            $form = $this->createDeleteForm($movie);
-            $form->handleRequest($request);
+        if(!$hasAccess) return $this->redirectToRoute('homepage');
 
-            if ($form->isSubmitted() && $form->isValid()) {
-                $em = $this->getDoctrine()->getManager();
-                $em->remove($movie);
-                $em->flush();
-            }
+        $form = $this->createDeleteForm($movie);
+        $form->handleRequest($request);
 
-            return $this->redirectToRoute('movie_index');
-        } else {
-            return $this->redirectToRoute('homepage');
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $em->remove($movie);
+            $em->flush();
         }
+
+        return $this->redirectToRoute('movie_index');
     }
 
     /**

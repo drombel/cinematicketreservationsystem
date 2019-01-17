@@ -46,7 +46,6 @@ class UserController extends Controller
         return $this->render('user/index.html.twig', array(
             'users' => $users,
             'city' => $cityName,
-            'role' => 'moderator'
         ));
     }
 
@@ -160,6 +159,12 @@ class UserController extends Controller
         $loggedUserId = $this->get('security.token_storage')->getToken()->getUser()->getId();
 
         $deleteForm = $this->createDeleteForm($user);
+        $editForm = $this->createForm('AppBundle\Form\UserUpdateType');
+
+        if (
+        ($loggedUserRole === 'supervisior' && strval($loggedUserId) !== $id) ||
+        ($loggedUserRole === 'client' && strval($loggedUserId) !== $id)
+        ) return $this->redirectToRoute('homepage');
 
         if ($loggedUserRole !== 'admin' && strval($loggedUserId) === $id) {
 
@@ -184,37 +189,13 @@ class UserController extends Controller
                         $user->setEmailActivate(0);
                         $this->getDoctrine()->getManager()->flush();
 
-                        $message = (new \Swift_Message('Registration'))
-                            ->setFrom('ticketmaniac2018@gmail.com')
-                            ->setTo($user->getEmail())
-                            ->setBody(
-                                $this->renderView(
-                                    'Emails/register.html.twig', array(
-                                        'name' => $user->getName(),
-                                        'activationToken' => $user->getActivationToken()
-                                    )
-                                ),
-                                'text/html'
-                            );
-
-                        $mailer->send($message);
+                        $this->sendEmail($user, $mailer);
 
                         return $this->redirectToRoute('logout');
                     }
                     return $this->redirectToRoute('user_edit', array('id' => $user->getId()));
                 }
             }
-
-            return $this->render('user/edit.html.twig', array(
-                'loggedUserRole' => $loggedUserRole,
-                'user' => $user,
-                'edit_form' => $editUserForm->createView(),
-                'delete_form' => $deleteForm->createView(),
-            ));
-
-        } elseif ($loggedUserRole === 'client' && strval($loggedUserId) !== $id) {
-
-            return $this->redirectToRoute('homepage');
 
         } elseif ($loggedUserRole === 'moderator' && strval($loggedUserId) !== $id) {
 
@@ -228,29 +209,17 @@ class UserController extends Controller
                 $ids[] = strval($userId->getId());
             }
 
-            if (in_array($id, $ids)) {
+            if (!in_array($id, $ids)) return $this->redirectToRoute('user_index');
 
-                $editForm = $this->createForm('AppBundle\Form\UserUpdateModeratorType', $user);
-                $editForm->handleRequest($request);
+            $editForm = $this->createForm('AppBundle\Form\UserUpdateModeratorType', $user);
+            $editForm->handleRequest($request);
 
-                if ($editForm->isSubmitted() && $editForm->isValid()) {
-                    $this->getDoctrine()->getManager()->flush();
+            if ($editForm->isSubmitted() && $editForm->isValid()) {
+                $this->getDoctrine()->getManager()->flush();
 
-                    return $this->redirectToRoute('user_edit', array('id' => $user->getId()));
-                }
-
-                return $this->render('user/edit.html.twig', array(
-                    'loggedUserRole' => $loggedUserRole,
-                    'user' => $user,
-                    'edit_form' => $editForm->createView(),
-                    'delete_form' => $deleteForm->createView(),
-                ));
-
-            } else {
-
-                return $this->redirectToRoute('user_index');
-
+                return $this->redirectToRoute('user_edit', array('id' => $user->getId()));
             }
+
         } else {
 
             $editForm = $this->createForm('AppBundle\Form\UserUpdateAdminType', $user);
@@ -264,14 +233,13 @@ class UserController extends Controller
 
                 return $this->redirectToRoute('user_edit', array('id' => $user->getId()));
             }
-
-            return $this->render('user/edit.html.twig', array(
-                'loggedUserRole' => $loggedUserRole,
-                'user' => $user,
-                'edit_form' => $editForm->createView(),
-                'delete_form' => $deleteForm->createView(),
-            ));
         }
+        return $this->render('user/edit.html.twig', array(
+            'loggedUserRole' => $loggedUserRole,
+            'user' => $user,
+            'edit_form' => $editForm->createView(),
+            'delete_form' => $deleteForm->createView(),
+        ));
     }
 
     /**
@@ -514,5 +482,24 @@ class UserController extends Controller
         } else {
             return false;
         }
+    }
+
+    private function sendEmail($user, \Swift_Mailer $mailer)
+    {
+        $data = [
+            'name' => $user->getName(),
+            'activationToken' => $user->getActivationToken()
+        ];
+
+        $message = (new \Swift_Message('Registration'))
+            ->setFrom('ticketmaniac2018@gmail.com')
+            ->setTo($user->getEmail())
+            ->setBody(
+                $this->renderView(
+                    'Emails/register.html.twig', $data),
+                'text/html'
+            );
+
+        $mailer->send($message);
     }
 }
