@@ -56,7 +56,7 @@ class UserUpdateModeratorType extends AbstractType
             ->add('role', ChoiceType::class, array(
                 'label' => 'Uprawnienia',
                 'choices'  => array(
-                    'Supervisor' => 'supervisor',
+                    'Supervisior' => 'supervisior',
                     'Client' => 'client',
                 ),
             ))

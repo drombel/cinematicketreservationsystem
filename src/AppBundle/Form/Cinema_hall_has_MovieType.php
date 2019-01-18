@@ -2,6 +2,8 @@
 
 namespace AppBundle\Form;
 
+use Doctrine\ORM\EntityRepository;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
@@ -16,8 +18,17 @@ class Cinema_hall_has_MovieType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('movieId')
-            ->add('cinemaHallId')
+            ->add('movieId', EntityType::class, [
+                'class' => 'AppBundle:Movie',
+                'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('u');
+                },
+                'choice_label' => 'title',
+            ])
+            ->add('cinemaHallId', EntityType::class, [
+                'class' => 'AppBundle:Cinema_hall',
+                'choice_label' => 'id',
+            ])
             ->add('timeStart')
             ->add('timeEnd')
             ->add('timeMovieStart')

@@ -21,7 +21,9 @@ class RemindPasswordType extends AbstractType
         $builder->add('email', EmailType::class, array(
             'label' => 'Podaj email, na który zostanie wysłane nowe hasło',
             'required' => true,
-            'attr' => array('class' => 'form-control'),
+            'attr' => array(
+                'class' => 'form-control',
+                'pattern' => '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'),
         ))
         ->add('submit', SubmitType::class, array(
             'label' => 'Wyślij',

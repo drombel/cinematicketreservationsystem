@@ -24,7 +24,9 @@ class UserUpdateType extends AbstractType
             ->add('email', EmailType::class, array(
                 'label' => 'Nowy e-mail',
                 'required' => false,
-                'attr' => array('class' => 'form-control'),
+                'attr' => array(
+                    'class' => 'form-control',
+                    'pattern' => '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'),
             ))
             ->add('oldPassword', PasswordType::class, array(
                 'label' => 'Stare hasło',

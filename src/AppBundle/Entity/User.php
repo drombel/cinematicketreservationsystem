@@ -367,5 +367,9 @@ class User implements UserInterface
     {
         return null;
     }
+
+    public function __toString() {
+        return $this->email;
+    }
 }
 

@@ -18,7 +18,11 @@ class CityType extends AbstractType
         $builder
             ->add('name', TextType::class, array(
                 'label' => 'Nazwa',
-                'attr' => ['pattern' => '[a-żA-Ż]*', 'class' => 'form-control'],
+                'attr' => array(
+                    'class' => 'form-control',
+                    'pattern' => '[a-żA-Ż]{3,}',
+                    'required' => true,
+                    'title' => 'Minimum 3 znaki'),
             ));
     }
     

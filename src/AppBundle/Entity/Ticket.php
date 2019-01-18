@@ -24,8 +24,8 @@ class Ticket
     /**
      * @var int
      *
-     * @ORM\Column(name="cinemaHall_has_movieId", type="integer")
      * @ORM\ManyToOne(targetEntity="Cinema_hall_has_Movie")
+     * @ORM\JoinColumn(name="$cinemaHallHasMovieId", nullable=false)
      */
     private $cinemaHallHasMovieId;
 

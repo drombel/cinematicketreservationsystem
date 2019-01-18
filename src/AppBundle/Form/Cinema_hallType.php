@@ -18,7 +18,10 @@ class Cinema_hallType extends AbstractType
         $builder
             ->add('number', IntegerType::class, array(
                 'label' => 'Numer',
-                'attr' => array('class' => 'form-control','min' => 1, 'autofocus' => true),
+                'attr' => array(
+                    'class' => 'form-control',
+                    'min' => 1,
+                    'autofocus' => true),
                 'required' => true
             ))
             ->add('cinemaId');

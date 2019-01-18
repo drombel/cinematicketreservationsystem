@@ -24,15 +24,26 @@ class UserUpdateAdminType extends AbstractType
         $builder
             ->add('name', TextType::class, array(
                 'label' => 'Imię',
-                'attr' => array('class' => 'form-control', 'autofocus' => true),
+                'attr' => array(
+                    'class' => 'form-control',
+                    'autofocus' => true,
+                    'pattern' => '[a-żA-Ż]{3,}',
+                    'required' => true,
+                    'title' => 'Minimum 3 znaki'),
             ))
             ->add('surname', TextType::class, array(
                 'label' => 'Nazwisko',
-                'attr' => array('class' => 'form-control'),
+                'attr' => array(
+                    'class' => 'form-control',
+                    'pattern' => '[a-żA-Ż]{3,}',
+                    'required' => true,
+                    'title' => 'Minimum 3 znaki'),
             ))
             ->add('email', EmailType::class, array(
                 'label' => 'E-mail',
-                'attr' => array('class' => 'form-control'),
+                'attr' => array(
+                    'class' => 'form-control',
+                    'pattern' => '^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'),
             ))
             ->add('password', TextType::class, array(
                 'label' => 'Hasło',
@@ -52,7 +63,7 @@ class UserUpdateAdminType extends AbstractType
                 'choices'  => array(
                     'Admin' => 'admin',
                     'Moderator' => 'moderator',
-                    'Supervisor' => 'supervisor',
+                    'Supervisior' => 'supervisior',
                     'Client' => 'client',
                 ),
             ))

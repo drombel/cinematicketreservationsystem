@@ -212,5 +212,9 @@ class Cinema_hall_has_Movie
             $this->timeMovieEnd = $timeMovieEnd;
     }
 
+    public function __toString() {
+        return (string)$this->id;
+    }
+
 }
 

@@ -3,6 +3,7 @@
 namespace AppBundle\Controller;
 
 use AppBundle\Entity\Cinema_hall;
+use AppBundle\Entity\Seat;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;use Symfony\Component\HttpFoundation\Request;
@@ -48,6 +49,11 @@ class Cinema_hallController extends Controller
      */
     public function setSeatsAction(Request $request)
     {
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+        $hasAccess = $this->hasAccess($loggedUserRole);
+
+        if(!$hasAccess) return $this->redirectToRoute('homepage');
+
         $form = $this->createForm('AppBundle\Form\SetSeatsType');
         $form->handleRequest($request);
 

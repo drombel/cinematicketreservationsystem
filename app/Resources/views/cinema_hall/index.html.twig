@@ -3,6 +3,8 @@
 {% block body %}
     <h1>Lista sal kinowych</h1>
 
+    <a href="{{ path('cinema_hall_new') }}">Dodaj salę kinową</a><br><br>
+
     <div class="table-responsive">
         <table class="table">
             <thead>
@@ -22,13 +24,13 @@
                     <td>
                         <ul>
                             <li>
-                                <a href="{{ path('cinema_hall_show', { 'id': cinema_hall.id }) }}">show</a>
+                                <a href="{{ path('cinema_hall_show', { 'id': cinema_hall.id }) }}">Pokaż</a>
                             </li>
                             <li>
-                                <a href="{{ path('cinema_hall_edit', { 'id': cinema_hall.id }) }}">edit</a>
+                                <a href="{{ path('cinema_hall_edit', { 'id': cinema_hall.id }) }}">Edytuj</a>
                             </li>
                             <li>
-                                <a href="{{ path('cinema_hall_set_seats', { 'id': cinema_hall.id }) }}">set seats</a>
+                                <a href="{{ path('cinema_hall_set_seats', { 'id': cinema_hall.id }) }}">Ustaw siedzenia</a>
                             </li>
                         </ul>
                     </td>
@@ -37,9 +39,4 @@
             </tbody>
         </table>
     </div>
-    <ul>
-        <li>
-            <a href="{{ path('cinema_hall_new') }}">Create a new cinema_hall</a>
-        </li>
-    </ul>
 {% endblock %}

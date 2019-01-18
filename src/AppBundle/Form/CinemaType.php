@@ -23,15 +23,21 @@ class CinemaType extends AbstractType
             ))
             ->add('street', TextType::class, array(
                 'label' => 'Ulica',
-                'attr' => array('pattern' => '[a-żA-Ż]*', 'class' => 'form-control'),
+                'attr' => array(
+                    'pattern' => '[a-żA-Ż]*',
+                    'class' => 'form-control'),
             ))
             ->add('streetNumber', TextType::class, array(
                 'label' => 'Numer',
-                'attr' => array('pattern' => '[0-9]*[ ]?[a-zA-Z]*', 'class' => 'form-control'),
+                'attr' => array(
+                    'pattern' => '[0-9]*[ ]?[a-zA-Z]*',
+                    'class' => 'form-control'),
             ))
             ->add('zipcode', TextType::class, array(
                 'label' => 'Kod pocztowy',
-                'attr' => array('pattern' => '[0-9]{2}\-[0-9]{3}', 'class' => 'form-control'),
+                'attr' => array(
+                    'pattern' => '[0-9]{2}\-[0-9]{3}',
+                    'class' => 'form-control'),
             ))
             ->add('city', EntityType::class, array(
                 'class' => 'AppBundle:City',

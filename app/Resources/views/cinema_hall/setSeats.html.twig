@@ -1,16 +1,13 @@
 {% extends 'base_panel.html.twig' %}
 
 {% block body %}
-    <h1>Setting new seats for Cinema_hall</h1>
+    <h1>Ustaw siedzenia sali kinowej</h1>
 
     {{ form_start(form) }}
         {{ form_widget(form) }}
-        <input type="submit" value="Set" />
+        <input class="btn btn-success" type="submit" value="Ustaw" />
     {{ form_end(form) }}
 
-    <ul>
-        <li>
-            <a href="{{ path('cinema_hall_index') }}">Back to the list</a>
-        </li>
-    </ul>
+    <br><a class="btn btn-light" href="{{ path('cinema_hall_index') }}">Powrót do listy</a>
+
 {% endblock %}
