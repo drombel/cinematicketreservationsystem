@@ -44,6 +44,14 @@ class Ticket
     private $date;
 
     /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="sendMailDate", type="datetime")
+     */
+    private $sendMailDate;
+
+
+    /**
      * @var int
      *
      * @ORM\ManyToOne(targetEntity="User")
@@ -212,9 +220,27 @@ class Ticket
         $this->date = $date;
     }
 
+    /**
+     * @return \DateTime
+     */
+    public function getSendMailDate()
+    {
+        return $this->sendMailDate;
+    }
+
+    /**
+     * @param \DateTime $sendMailDate
+     */
+    public function setSendMailDate($sendMailDate)
+    {
+        $this->sendMailDate = $sendMailDate;
+    }
+
+
     public function __construct()
     {
         $this->date = new \DateTime();
     }
+
 }
 

@@ -21,4 +21,13 @@ class TicketRepository extends \Doctrine\ORM\EntityRepository
         return $query->getResult();
     }
 
+    public function deleteSeatsById($id)
+    {
+        $query = $this->getEntityManager()
+            ->createQuery(
+                'DELETE FROM AppBundle:Ticket m WHERE m.id = :id'
+            )->setParameter('id', $id);
+        return $query->getResult();
+    }
+
 }

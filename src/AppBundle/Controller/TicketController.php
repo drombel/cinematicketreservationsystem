@@ -237,6 +237,7 @@ class TicketController extends Controller
             }
             $ticket->setStatus('Pending');
             $ticket->setDate($date);
+            $ticket->setSendMailDate(new Datetime());
 
             if($flag == true){
                 $em->persist($ticket);
