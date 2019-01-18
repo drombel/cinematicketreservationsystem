@@ -30,10 +30,10 @@
                     <td>
                         <ul>
                             <li>
-                                <a href="{{ path('cinema_hall_has_movie_show', { 'id': cinema_hall_has_Movie.id }) }}">show</a>
+                                <a href="{{ path('cinema_hall_has_movie_show', { 'id': cinema_hall_has_Movie.id }) }}">Pokaż</a>
                             </li>
                             <li>
-                                <a href="{{ path('cinema_hall_has_movie_edit', { 'id': cinema_hall_has_Movie.id }) }}">edit</a>
+                                <a href="{{ path('cinema_hall_has_movie_edit', { 'id': cinema_hall_has_Movie.id }) }}">Edytuj</a>
                             </li>
                         </ul>
                     </td>
@@ -42,9 +42,4 @@
             </tbody>
         </table>
     </div>
-    <ul>
-        <li>
-            <a href="{{ path('cinema_hall_has_movie_new') }}">Create a new cinema_hall_has_Movie</a>
-        </li>
-    </ul>
 {% endblock %}

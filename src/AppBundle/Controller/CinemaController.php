@@ -81,14 +81,12 @@ class CinemaController extends Controller
             $form = $this->createForm('AppBundle\Form\CinemaType', $cinema);
         } else {
             $form = $this->createForm('AppBundle\Form\CinemaType', $cinema);
-            /*$form->remove('city');
+            $form->remove('city');
             $form->add('city', EntityType::class, array(
                 'attr' => array('class' => 'form-control'),
                 'class' => 'AppBundle:City',
-                'data' => $userCityId,
-                'disabled' => true
-            ));*/
-            //$form->get('city')->setData($userCityId);
+                'choices' => array($userCityId),
+            ));
         }
 
         $form->handleRequest($request);
@@ -160,6 +158,12 @@ class CinemaController extends Controller
 
         $deleteForm = $this->createDeleteForm($cinema);
         $editForm = $this->createForm('AppBundle\Form\CinemaType', $cinema);
+        $editForm->remove('city');
+        $editForm->add('city', EntityType::class, array(
+            'attr' => array('class' => 'form-control'),
+            'class' => 'AppBundle:City',
+            'choices' => array($userCityId),
+        ));
         $editForm->handleRequest($request);
 
         if ($editForm->isSubmitted() && $editForm->isValid()) {
