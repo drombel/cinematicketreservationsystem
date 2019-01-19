@@ -25,10 +25,10 @@ class GreetCommand extends ContainerAwareCommand
 
         while(true){
             $now = (new DateTime());
-            foreach ($repoTicket->findBy(array('cinemaHallHasMovieId' => 1)) as $ticket){
+            foreach ($repoTicket->findBy(array('status' => 'Pending')) as $ticket){
                 $date = $ticket->getSendMailDate();
                 $date->modify('+30 minutes');
-                if ($now < $date){
+                if ($now > $date){
                     $repoTicket->deleteSeatsById($ticket->getId());
                     echo "usunalem ticket o id = ".$ticket->getId();
                 }

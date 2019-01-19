@@ -189,9 +189,5 @@ class Movie
         return $this->price;
     }
 
-    /**
-     * @return mixed
-     */
-
 }
 

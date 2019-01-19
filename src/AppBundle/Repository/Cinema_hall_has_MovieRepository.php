@@ -19,7 +19,7 @@ class Cinema_hall_has_MovieRepository extends \Doctrine\ORM\EntityRepository
     public function isCinemaHallFreeWithDate($cinema_hall_has_Movie){
         $id = $cinema_hall_has_Movie;
         $id = !$id?0:1;
-        $cinemaHallId = $cinema_hall_has_Movie->getCinemaHallId();
+        $cinemaHallId = $cinema_hall_has_Movie->getCinemaHallId()->getId();
         $timeMovieStart = $cinema_hall_has_Movie->getTimeMovieStart()->format('H:i:s');
         $timeMovieEnd = $cinema_hall_has_Movie->getTimeMovieEnd()->format('H:i:s');
         $timeStart = $cinema_hall_has_Movie->getTimeStart()->format('Y-m-d');
@@ -30,7 +30,7 @@ class Cinema_hall_has_MovieRepository extends \Doctrine\ORM\EntityRepository
         $query = $connection->prepare(
             'SELECT * FROM cinema_hall_has__movie WHERE 
                 (id != :id) AND
-                (cinema_hallId = :cinemaHallId) AND
+                (cinemaHallId = :cinemaHallId) AND
                 (
                     (:time_movie_start < time(time_movie_start) AND time(time_movie_end) < :time_movie_end) OR      
                     (

@@ -92,5 +92,9 @@ class Cinema_hall
     {
         return $this->cinemaId;
     }
+
+    public function __toString(){
+        return (string)$this->id;
+    }
 }
 

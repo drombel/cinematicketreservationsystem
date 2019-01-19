@@ -17,6 +17,7 @@
                             <li class="nav-item px-xs-2 px-sm-2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><a href="#" class="nav-link">Ustawienia</a></li>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 <a class="dropdown-item" href="{{ path('user_edit', { 'id': app.user.id }) }}">Zmień hasło/email</a>
+                                <a class="dropdown-item" href="{{ path('history') }}">Historia</a>
                                 {% if app.user.role == 'admin' or app.user.role == 'moderator' %}
                                     <a class="dropdown-item" href="{{ path('user_index') }}">Użytkownicy</a></li>
                                     <a class="dropdown-item" href="{{ path('cinema_index') }}">Kino</a></li>

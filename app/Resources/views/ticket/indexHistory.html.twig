@@ -1,0 +1,31 @@
+{% extends 'base_panel.html.twig' %}
+
+{% block body %}
+    <h1>Historia biletów</h1>
+
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>Cinema</th>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Movie start</th>
+                <th>Movie end</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for ticket in tickets %}
+            <tr>
+                <td>{{ ticket.cinemaHallHasMovieId.cinemaHallId.cinemaId.name }}</td>
+                <td>{{ ticket.cinemaHallHasMovieId.movieId.title }}</td>
+                <td>{{ ticket.date|date('Y-m-d') }}</td>
+                <td>{{ ticket.cinemaHallHasMovieId.timeMovieStart|date('H:i') }}</td>
+                <td>{{ ticket.cinemaHallHasMovieId.timeMovieEnd|date('H:i') }}</td>
+            </tr>
+            {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

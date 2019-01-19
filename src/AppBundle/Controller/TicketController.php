@@ -228,7 +228,7 @@ class TicketController extends Controller
             }
 
             $ticket = new Ticket();
-            $ticket->setCinemaHallHasMovieId($cinemaHallHasMovieId);
+            $ticket->setCinemaHallHasMovieId($Cinema_hall_has_Movie);
             $ticket->setEmail($email);
             $ticket->setSeatId($seatIds);
             if($name == '' && $surname == '') {
@@ -256,6 +256,40 @@ class TicketController extends Controller
         // potem wszystko sie pozmienia zeby wygladalo fancy,
 
         // jeszcze gdzies maila wstawic i bedzie bilet, wtedy to zabezpieczenia i rzeczy panelowe
+    }
+
+    /**
+     * User's ticket history
+     *
+     * @Route("/history", name="history")
+     * @Method({"GET"})
+     */
+    public function historyAction(Request $request)
+    {
+        $loggedUserRole = $this->get('security.token_storage')->getToken()->getUser();
+
+        if($loggedUserRole === 'anon.') return $this->redirectToRoute('homepage');
+
+        $loggedUserEmail = $this->get('security.token_storage')->getToken()->getUser()->getEmail();
+        $em = $this->getDoctrine()->getManager();
+        $tickets = $em->getRepository('AppBundle:Ticket')->findBy(array('status' => 'Ok', 'email' => $loggedUserEmail));
+
+        $now = new Datetime();
+        $ticketsHistory = [];
+
+        foreach ($tickets as $ticket) {
+            $ticketChm = $em->getRepository('AppBundle:Cinema_hall_has_Movie')->find($ticket->getCinemaHallHasMovieId());
+
+            if(
+                (int)$now->format('Ymd') >= (int)$ticket->getDate()->format('Ymd') &&
+                (int)$now->format('His') >= (int)$ticketChm->getTimeMovieEnd()->format('His')
+            ) {
+                $ticketsHistory[] = $ticket;
+            }
+        }
+        return $this->render('ticket/indexHistory.html.twig', array(
+            'tickets' => $ticketsHistory,
+        ));
     }
 
     /**

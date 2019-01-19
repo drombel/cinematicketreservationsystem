@@ -24,16 +24,16 @@ class Cinema_hall_has_Movie
     /**
      * @var int
      *
-     * @ORM\Column(name="movieId", type="integer")
      * @ORM\ManyToOne(targetEntity="Movie")
+     * @ORM\JoinColumn(name="movieId", nullable = false)
      */
     private $movieId;
 
     /**
      * @var int
      *
-     * @ORM\Column(name="cinema_hallId", type="integer")
      * @ORM\ManyToOne(targetEntity="Cinema_hall")
+     * @ORM\JoinColumn(name="cinemaHallId", nullable = false)
      */
     private $cinemaHallId;
 
