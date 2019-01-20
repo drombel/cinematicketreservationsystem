@@ -3,7 +3,7 @@
 {% block body %}
     <h1>Dodaj salę z filmem</h1>
 
-    {% if error != "" %}
+    {% if error is defined and error != "" %}
     <h3 class="text-white bg-danger p-2">{{ error }}</h3>
     {% endif %}
 

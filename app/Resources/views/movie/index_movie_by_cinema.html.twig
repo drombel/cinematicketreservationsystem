@@ -13,7 +13,7 @@
                     <input id="movieId" type="hidden" value="{{ movie.id }}">
                     <h1 class="font-weight-bold">{{ movie.title }}</h1>
                     <p>{{ movie.description }}</p>
-                    <h5>Cena: {{ movie.price }} zł, ulgowy: {{ moviePriceDisc }} zł</h5>
+                    <h5>Cena: {{ movie.price|number_format(2, '.', ' ') }} zł, ulgowy: {{ moviePriceDisc|number_format(2, '.', ' ') }} zł</h5>
                         <div class="pb-3 pt-2">
                             <select name="cinemaId" id="cinemaId" class="col-12 col-sm-6 col-md-4 col-lg-4">
                                 <option value="" disabled="disabled" {%  if cinema is not defined %}selected{% endif %}>Wybierz kino</option>

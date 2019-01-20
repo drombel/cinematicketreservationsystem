@@ -4,7 +4,7 @@
     <section id="slider" class="bg-page-dark-1">
         <div class="slider-background">
             {% for i in 1..4 %}
-                <img src="images/slider{{ i }}.jpg" alt="" class="section-slider-background" data-background-id="{{ i }}">
+                <img src="{{ movies[i-1].scene }}" alt="{{ movies[i-1].title }}" class="section-slider-background" data-background-id="{{ i }}">
             {% endfor %}
         </div>
         <div class="container">
@@ -21,7 +21,7 @@
                 {% for i in 1..4 %}
                     <div class="item" data-background-id="{{ i }}">
                         {% include 'default/movie_preview.html.twig' with
-                            {'title':'Nazwa filmu', 'categories':['category1','category2'], 'mark':4.5,'poster': '/images/sliderimg.jpg'}
+                            {'title': movies[i-1].title, 'poster': movies[i-1].poster, 'link':path('movie_by_cinema', {'movie_id': movies[i-1].id}) }
                             only %}
                     </div>
                 {% endfor %}
@@ -39,14 +39,14 @@
                 <div class="content-tabs col font-weight-light">
                     <ul class="nav nav-tabs border-0">
                         <li class="nav-item">
-                            <a class="nav-link py-3 px-0 mr-4 active show" data-toggle="tab" href="#home">NEW RELEASES</a>
+                            <a class="nav-link py-3 px-0 mr-4 active show" data-toggle="tab" href="#home">Najlepsze filmy</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link py-3 px-0 mr-4" data-toggle="tab" href="#menu1">MOVIES</a>
+                            <a class="nav-link py-3 px-0 mr-4" data-toggle="tab" href="#menu1">Inne filmy</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link py-3 px-0 mr-4" data-toggle="tab" href="#menu2">TV SERIES</a>
-                        </li>
+                        {#<li class="nav-item">#}
+                            {#<a class="nav-link py-3 px-0 mr-4" data-toggle="tab" href="#menu2">TV SERIES</a>#}
+                        {#</li>#}
                     </ul>
                 </div>
             </div>
@@ -56,17 +56,17 @@
             <div class="tab-content">
                 <div class="tab-pane container active" id="home">
                     <div class="row">
-                        {% for i in 1..6 %}
+                        {% for i in 5..10 %}
                             <div class="col-6 col-sm-12 col-lg-6 mb-5">
                                 <div class="row">
                                     <div class="col-12 col-sm-4">
-                                        <img src="/images/sliderimg.jpg" class="img-fluid" alt="">
+                                        <img src="{{ movies[i-1].poster }}" class="img-fluid" alt="{{ movies[i-1].title }}">
                                     </div>
                                     <div class="col-12 col-sm-8">
-                                        <h4 class="m-0">I Dream in Another Language</h4>
-                                        <p class="mb-1 mt-0">Category1, Category2</p>
-                                        <p class="m-1 mt-0"># ocena</p>
-                                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. At eligendi, explicabo facilis illo iusto magnam magni odit quaerat suscipit tempora.</p>
+                                        <h4 class="m-0">{{ movies[i-1].title }}</h4>
+                                        {#<p class="mb-1 mt-0">Category1, Category2</p>#}
+                                        {#<p class="m-1 mt-0"># ocena</p>#}
+                                        <p>{{ movies[i-1].description }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -76,27 +76,27 @@
 
                 <div class="tab-pane container" id="menu1">
                     <div class="row">
-                    {% for i in 1..12 %} {# to tez jest w sliderze #}
+                    {% for i in 11..22 %}
                         <div class="col-lg-2 col-md-2 col-sm-6 col-xs-12">
                             {% include 'default/movie_preview.html.twig' with
-                                {'title':'Nazwa filmu', 'categories':['category1','category2'], 'mark':4.5,'poster': '/images/sliderimg.jpg'}
+                                {'title': movies[i-1].title, 'poster': movies[i-1].poster, 'link':path('movie_by_cinema', {'movie_id': movies[i-1].id}) }
                                 only %}
                         </div>
                     {% endfor %}
                     </div>
                 </div>
 
-                <div class="tab-pane container" id="menu2">
-                    <div class="row">
-                        {% for i in 1..12 %} {# to tez jest w sliderze #}
-                            <div class="col-lg-2 col-md-2 col-sm-6 col-xs-12">
-                                {% include 'default/movie_preview.html.twig' with
-                                    {'title':'Nazwa filmu', 'categories':['category1','category2'], 'mark':4.5,'poster': '/images/sliderimg.jpg'}
-                                    only %}
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
+                {#<div class="tab-pane container" id="menu2">#}
+                    {#<div class="row">#}
+                        {#{% for i in 1..12 %} #}{# to tez jest w sliderze #}
+                            {#<div class="col-lg-2 col-md-2 col-sm-6 col-xs-12">#}
+                                {#{% include 'default/movie_preview.html.twig' with#}
+                                    {#{'title':'Nazwa filmu', 'categories':['category1','category2'], 'mark':4.5,'poster': '/images/sliderimg.jpg'}#}
+                                    {#only %}#}
+                            {#</div>#}
+                        {#{% endfor %}#}
+                    {#</div>#}
+                {#</div>#}
             </div>
 
         </div>
@@ -104,13 +104,13 @@
 
     <section id="premieres" class="bg-page-dark-2 py-5">
         <div class="container">
-            <h2>Expected premiere</h2>
+            <h2>Polecane filmy</h2>
             <div class="row pt-4">
-                {% for i in 1..6 %} {# to tez jest w sliderze #}
+                {% for i in 23..28 %} {# to tez jest w sliderze #}
                     <div class="col-6 col-sm-4 col-md-3 col-lg-2">
                         {% include 'default/movie_preview.html.twig' with
-                            {'title':'Nazwa filmu', 'categories':['category1','category2'], 'mark':4.5,'poster': '/images/sliderimg.jpg'}
-                        only %}
+                            {'title': movies[i-1].title, 'poster': movies[i-1].poster, 'link':path('movie_by_cinema', {'movie_id': movies[i-1].id}) }
+                            only %}
                     </div>
                 {% endfor %}
             </div>

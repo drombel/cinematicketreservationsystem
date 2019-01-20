@@ -57,14 +57,14 @@ class Movie
      *
      * @ORM\Column(name="scene", type="string", length=255, nullable = true)
      * @Assert\Image(
-     *     minWidth = 1600,
-     *     maxWidth = 3360,
-     *     minHeight = 900,
-     *     maxHeight = 2100,
      *     minRatio = 1.5,
      *     maxRatio = 1.65
      * )
      */
+//*     minWidth = 1600,
+//*     maxWidth = 3360,
+//*     minHeight = 900,
+//*     maxHeight = 2100,
     private $scene;
 
     /**
