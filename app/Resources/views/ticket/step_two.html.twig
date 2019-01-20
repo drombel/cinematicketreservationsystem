@@ -1,15 +1,15 @@
-{#zmienic dane #}
-
 <div>
 {% if dates is empty %}
     <h3>Brak dni w których wyświetlamy ten film</h3>
 {% else %}
-    <select name="cinemaHallHasMovieDate" id="cinemaHallHasMovieDate">
-        <option value="" disabled="disabled">Wybierz dzień</option>
-        {% for date in dates %}
-            <option value="{{ date|date('Y-m-d') }}">{{ date|date('Y-m-d') }}</option>
-        {% endfor %}
-    </select>
+    <div class="pb-3 pt-2">
+        <select name="cinemaHallHasMovieDate" id="cinemaHallHasMovieDate" class="col-12 col-sm-6 col-md-4 col-lg-4" required>
+            <option value="" disabled="disabled">Wybierz dzień</option>
+            {% for date in dates %}
+                <option value="{{ date|date('Y-m-d') }}">{{ date|date('Y-m-d') }}</option>
+            {% endfor %}
+        </select>
+    </div>
     <button id="orderTicketStep3" class="btn btn-dark text-uppercase d-block">zamów bilet</button>
 {% endif %}
 </div>

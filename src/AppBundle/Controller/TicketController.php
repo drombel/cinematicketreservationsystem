@@ -62,14 +62,11 @@ class TicketController extends Controller
      */
     public function stepOneAction(Request $request)
     {
-        // o ktorej seans
-
         $cinemaId = $request->request->getInt("cinemaId");
         $movieId = $request->request->getInt("movieId");
 
         $data = [];
         if ($cinemaId>0 && $movieId>0){
-            //godziny do wyboru
             $em = $this->getDoctrine()->getManager();
 
             $repo = $em->getRepository('AppBundle:Ticket');
@@ -90,15 +87,12 @@ class TicketController extends Controller
      */
     public function stepTwoAction(Request $request)
     {
-        // kiedy seans
-
         $cinemaId = $request->request->getInt("cinemaId");
         $movieId = $request->request->getInt("movieId");
         $cinemaHallHasMovieId = $request->request->getInt("cinemaHallHasMovieId");
 
         $data = [];
         if ($cinemaId>0 && $movieId>0 && $cinemaHallHasMovieId>0){
-            //dni do wyboru max tydzien do przodu, od dzisiejszej daty do +7 chyba ze data koncwa jest mniejsza
             $em = $this->getDoctrine()->getManager();
 
             $repoCHHM = $em->getRepository('AppBundle:Cinema_hall_has_Movie');
@@ -110,15 +104,13 @@ class TicketController extends Controller
             $dates = [];
             $week = 7;
 
-            // sprawdzenie czy dzisiaj jeszcze bedzie grane
             if ($now < $dateBeginMovieToday){
                 $dates[] = new DateTime($now->format('Y-m-d'));
             }
 
-            // tworzenie listy dat
             for ($i = count($dates); $i < $week; $i++){
-                $now->add(new DateInterval('P1D')); // dodaje 1 dzien
-                // sprawdza czy aktualnie sprawdzana data jest mniejsza od makymalnej tego filmu
+                $now->add(new DateInterval('P1D'));
+
                 if($now < $dateEndMovie){ $dates[] = new DateTime($now->format('Y-m-d')); }
                 else{ break; }
             }
@@ -145,7 +137,7 @@ class TicketController extends Controller
         $date = new DateTime($request->request->get("date"));
 
         if ( $cinemaId > 0 && $movieId > 0 && $cinemaHallHasMovieId > 0 ){
-            //siedzenia i email
+
             $em = $this->getDoctrine()->getManager();
 
             $repoCHHM = $em->getRepository('AppBundle:Cinema_hall_has_Movie');
@@ -154,7 +146,7 @@ class TicketController extends Controller
 
             if (!$this->isDateAllowed($Cinema_hall_has_Movie, $date)){
                 echo 'niepoprawna data';
-                exit();// zmienic ta wiadomosc na cos sensownego // later
+                exit();
             }
 
             $seats = $this->getSeats($cinemaHallId);
@@ -211,7 +203,6 @@ class TicketController extends Controller
             $amountOfSeats == count($seatIds) &&
             filter_var($email, FILTER_VALIDATE_EMAIL)
         ){
-            //caly ticket i wysylanie maila
             $em = $this->getDoctrine()->getManager();
             $flag = true;
 
@@ -253,9 +244,6 @@ class TicketController extends Controller
         }
 
         return $this->render('ticket/step_four.html.twig', $data);
-        // potem wszystko sie pozmienia zeby wygladalo fancy,
-
-        // jeszcze gdzies maila wstawic i bedzie bilet, wtedy to zabezpieczenia i rzeczy panelowe
     }
 
     /**
@@ -514,6 +502,6 @@ class TicketController extends Controller
     private function isDateAllowed($Cinema_hall_has_Movie, $date){
         $dateBeginMovie = $Cinema_hall_has_Movie->getTimeStart();
         $dateEndMovie = new DateTime($Cinema_hall_has_Movie->getTimeEnd()->format('Y-m-d')." ".$Cinema_hall_has_Movie->getTimeMovieStart()->format('H:i'));
-        return ($dateBeginMovie < $date && $date < $dateEndMovie); // albo z negacja
+        return ($dateBeginMovie < $date && $date < $dateEndMovie);
     }
 }

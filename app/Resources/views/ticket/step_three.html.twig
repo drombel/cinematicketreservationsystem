@@ -35,13 +35,19 @@
     </div>
     <div class="emailField">
         {% if not isLogged %}
-            <div>Wpisz swoje imię</div>
-            <input type="text" name="name" id="name" value="">
-            <div>Wpisz swoje nazwisko</div>
-            <input type="text" name="surname" id="surname" value="">
+            <div class="pb-3 pt-2">
+                <div><label for="name">Wpisz swoje imię</label></div>
+                <input type="text" name="name" id="name" value="" class="col-12 col-sm-6 col-md-4 col-lg-4" required>
+            </div>
+            <div class="pb-3 pt-2">
+                <div><label for="surname">Wpisz swoje nazwisko</label></div>
+                <input type="text" name="surname" id="surname" value="" class="col-12 col-sm-6 col-md-4 col-lg-4" required>
+            </div>
         {% endif %}
-        <div>Wpisz swoj email w celu wysłania biletu</div>
-        <input type="email" name="email" id="email" value="">
+        <div class="pb-3 pt-2">
+            <div><label for="email">Wpisz swoj email w celu wysłania biletu</label></div>
+            <input type="email" name="email" id="email" value="" required>
+        </div>
     </div>
     <button id="orderTicketStep4" class="btn btn-dark text-uppercase d-block">zamów bilet</button>
 {% endif %}

@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use \DateTime;
 
 /**
  * Movie
@@ -72,6 +73,23 @@ class Movie
      * @ORM\Column(name="price", type="decimal", precision=8, scale=2)
      */
     private $price;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="dateAdd", type="datetime")
+     */
+
+    private $dateAdd;
+
+    /**
+     * Movie constructor.
+     * @param \DateTime $dateAdd
+     */
+    public function __construct()
+    {
+        $this->dateAdd = new DateTime();
+    }
 
 
     /**
@@ -187,6 +205,22 @@ class Movie
     public function getPrice()
     {
         return $this->price;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getDateAdd()
+    {
+        return $this->dateAdd;
+    }
+
+    /**
+     * @param \DateTime $dateAdd
+     */
+    public function setDateAdd($dateAdd)
+    {
+        $this->dateAdd = $dateAdd;
     }
 
 }

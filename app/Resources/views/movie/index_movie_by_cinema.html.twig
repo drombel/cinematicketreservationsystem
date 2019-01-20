@@ -9,13 +9,13 @@
                 <div class="col-12 col-xs-12 col-sm-4">
                     <img src="/{{ movie.poster }}" alt="{{ movie.title }}" class="img-fluid w-100">
                 </div>
-                <div class="col-12 col-xs-12 col-sm-8 pt-sm-0 pt-2 movie-main-description rounded">
+                <div class="col-12 col-xs-12 col-sm-8 pt-sm-0 py-2 movie-main-description rounded">
                     <input id="movieId" type="hidden" value="{{ movie.id }}">
                     <h1 class="font-weight-bold">{{ movie.title }}</h1>
                     <p>{{ movie.description }}</p>
                     <h5>Cena: {{ movie.price }} zł, ulgowy: {{ moviePriceDisc }} zł</h5>
                         <div class="pb-3 pt-2">
-                            <select name="cinemaId" id="cinemaId">
+                            <select name="cinemaId" id="cinemaId" class="col-12 col-sm-6 col-md-4 col-lg-4">
                                 <option value="" disabled="disabled" {%  if cinema is not defined %}selected{% endif %}>Wybierz kino</option>
                                 {% for cinema in cinemas %}
                                     <option value="{{ cinema.id }}" {{ cinema.id == cinema_id ? 'selected':'' }}>{{ cinema.name }}</option>
@@ -27,6 +27,14 @@
             </div>
         </div>
     </div>
+    <div class="lds-background">
+        <div class="lds-ring">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+    </div>
 {% endblock %}
 
 
@@ -36,6 +44,7 @@
             $('body').on('click','#orderTicketStep1',function () {
                 var ticketData = getData();
                 if(ticketData.movieId > 0 && ticketData.cinemaId > 0){
+                    showLoader();
                     $.ajax({
                         method: "POST",
                         url: "{{ path('ticket_step_1') }}",
@@ -44,10 +53,11 @@
                             $('.movie-main-description').append(response.responseText);
                             $('#cinemaId').attr('disabled','');
                             $('#orderTicketStep1').remove();
+                            hideLoader();
                         }
                     });
                 }else{
-                    alert('brak danych'); // zmienic na jakis czerwony napis nad danymi polami
+                    alert('brak danych');
                 }
             });
 
@@ -58,6 +68,7 @@
                     ticketData.cinemaId > 0 &&
                     ticketData.cinemaHallHasMovieId > 0
                 ){
+                    showLoader();
                     $.ajax({
                         method: "POST",
                         url: "{{ path('ticket_step_2') }}",
@@ -66,10 +77,11 @@
                             $('.movie-main-description').append(response.responseText);
                             $('#cinemaHallHasMovieId').attr('disabled','');
                             $('#orderTicketStep2').remove();
+                            hideLoader();
                         }
                     });
                 }else{
-                    alert('brak danych'); // zmienic na jakis czerwony napis nad danymi polami
+                    alert('brak danych');
                 }
             });
 
@@ -81,6 +93,7 @@
                     ticketData.cinemaHallHasMovieId > 0 &&
                     validateDate(ticketData.date)
                 ){
+                    showLoader();
                     $.ajax({
                         method: "POST",
                         url: "{{ path('ticket_step_3') }}",
@@ -89,10 +102,11 @@
                             $('.movie-main-description').append(response.responseText);
                             $('#cinemaHallHasMovieDate').attr('disabled','');
                             $('#orderTicketStep3').remove();
+                            hideLoader();
                         }
                     });
                 }else{
-                    alert('brak danych'); // zmienic na jakis czerwony napis nad danymi polami
+                    alert('brak danych');
                 }
             });
 
@@ -107,6 +121,7 @@
                     validateDate(ticketData.date) &&
                     ticketData.name != "" && ticketData.surname != ""
                 ){
+                    showLoader();
                     $.ajax({
                         method: "POST",
                         url: "{{ path('ticket_step_4') }}",
@@ -116,14 +131,13 @@
                             $('[name="seatId"]').click(function() { return false; });
                             $('#name, #email, #surname').attr('disabled','');
                             $('#orderTicketStep4').remove();
+                            hideLoader();
                         }
                     });
                 }else{
-                    alert('brak danych'); // zmienic na jakis czerwony napis nad danymi polami
+                    alert('brak danych');
                 }
             });
-
-            //movie-main-description appenda do tego zrobic
 
             function getData() {
                 var cinemaId = parseInt($('#cinemaId').val()),
@@ -162,6 +176,14 @@
             function validateDate(date) {
                 date = new Date(date);
                 return (date instanceof Date && !isNaN(date));
+            }
+
+            function showLoader() {
+                $('.lds-background').fadeIn(300);
+            }
+
+            function hideLoader() {
+                $('.lds-background').fadeOut(300);
             }
         });
     </script>

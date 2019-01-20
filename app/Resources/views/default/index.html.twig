@@ -33,13 +33,13 @@
             <div class="container">
                 <div class="row col-12 align-items-center">
                     <div class="col">
-                        <h2>New items</h2>
+                        <h2>Aktualne filmy</h2>
                     </div>
                 </div>
                 <div class="content-tabs col font-weight-light">
                     <ul class="nav nav-tabs border-0">
-                        <li class="nav-item active">
-                            <a class="nav-link py-3 px-0 mr-4" data-toggle="tab" href="#home">NEW RELEASES</a>
+                        <li class="nav-item">
+                            <a class="nav-link py-3 px-0 mr-4 active show" data-toggle="tab" href="#home">NEW RELEASES</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link py-3 px-0 mr-4" data-toggle="tab" href="#menu1">MOVIES</a>
@@ -119,14 +119,30 @@
 
     <section id="partners" class="bg-page-dark-1 pt-3 pb-5 border-after">
         <div class="container">
-            <h2 class="py-3">Our Partners</h2>
-            <p>It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using.</p>
+            <h2 class="py-3">Nasi partnerzy</h2>
+            <p>Oto firmy z którymi mamy nawiązaną współpracę</p>
             <div class="row py-4">
-                {% for i in 1..6 %}
-                    <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                        <a href="#"><img src="/images/partner.png" class="img-fluid" alt=""></a>
-                    </div>
-                {% endfor %}
+
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2 align-items-center d-flex">
+                    <a href="http://www.cinema3d.pl/"><img src="/images/logos/Cinema_3D.jpg" class="img-fluid" alt="Cinema 3D"></a>
+                </div>
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2 align-items-center d-flex">
+                    <a href="https://www.cinema-city.pl/"><img src="/images/logos/Cinema_City.gif" class="img-fluid" alt="Cinema City"></a>
+                </div>
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2 align-items-center d-flex">
+                    <a href="https://www.helios.pl/"><img src="/images/logos/Helios.png" class="img-fluid" alt="Helios"></a>
+                </div>
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2 align-items-center d-flex">
+                    <a href="https://www.cinema-city.pl/imax#/"><img src="/images/logos/IMAX.jpg" class="img-fluid" alt="IMAX"></a>
+                </div>
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2 align-items-center d-flex">
+                    <a href="http://dinopark.malbork.pl/kino-5d"><img src="/images/logos/KINO_5D.jpg" class="img-fluid" alt="KINO 5D"></a>
+                </div>
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2 align-items-center d-flex">
+                    <a href="https://multikino.pl/"><img src="/images/logos/Multikino.png" class="img-fluid" alt="Multikino"></a>
+                </div>
+
+
             </div>
         </div>
     </section>
@@ -186,7 +202,6 @@
                 });
                 slider.reloadSlider(options);
             });
-
 
         });
     </script>

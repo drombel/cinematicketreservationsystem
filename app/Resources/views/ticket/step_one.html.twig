@@ -2,12 +2,14 @@
 {% if Cinema_hall_has_Movie is empty %}
     <h3>Brak takich seansów w tym kinie</h3>
 {% else %}
-    <select name="cinemaHallHasMovieId" id="cinemaHallHasMovieId">
+    <div class="pb-3 pt-2">
+    <select name="cinemaHallHasMovieId" id="cinemaHallHasMovieId" class="col-12 col-sm-6 col-md-4 col-lg-4" required>
         <option value="" disabled="disabled">Wybierz seans</option>
         {% for chm in Cinema_hall_has_Movie %}
             <option value="{{ chm.id }}">{{ chm.timeMovieStart|date('H:i') }} - {{ chm.timeMovieEnd|date('H:i') }}</option>
         {% endfor %}
     </select>
+    </div>
     <button id="orderTicketStep2" class="btn btn-dark text-uppercase d-block">zamów bilet</button>
 {% endif %}
 </div>
