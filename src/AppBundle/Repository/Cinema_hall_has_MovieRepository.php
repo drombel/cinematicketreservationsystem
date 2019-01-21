@@ -39,10 +39,12 @@ class Cinema_hall_has_MovieRepository extends \Doctrine\ORM\EntityRepository
                     )
                 )
                  AND
-                (:time_start < date(time_start) AND date(time_end) < :time_end) OR      
                 (
-                    (:time_start BETWEEN date(time_start) AND date(time_end)) OR
-                    (:time_end BETWEEN date(time_start) AND date(time_end))
+                    (:time_start < date(time_start) AND date(time_end) < :time_end) OR      
+                    (
+                        (:time_start BETWEEN date(time_start) AND date(time_end)) OR
+                        (:time_end BETWEEN date(time_start) AND date(time_end))
+                    )
                 )
             ');
         $query->bindValue('id', $id);
